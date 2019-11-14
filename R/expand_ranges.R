@@ -19,8 +19,8 @@ expand_ranges <- function(
 	sequence_expansion = 10,
 	signal_expansion = 15
 ) {
-	sequence_expanded <- map(experiment$experiment, ~ expand_range(.x, sequence_expansion))
-	signal_expanded <- map(experiment$experiment, ~ expand_range(.x, signal_expansion))
+	sequence_expanded <- map(experiment@experiment, ~ expand_range(.x, sequence_expansion))
+	signal_expanded <- map(experiment@experiment, ~ expand_range(.x, signal_expansion))
 
 	experiment@ranges <- list(
 		"sequence" = sequence_expanded,
@@ -42,11 +42,11 @@ expand_ranges <- function(
 #' @return Expanded GRanges object
 
 expand_range <- function(grange, expand_size) {
-	tss_pos <- tss_granges[strand(tss_granges) == "+"] %>%
+	tss_pos <- grange[strand(grange) == "+"] %>%
                 resize(width = expand_size, fix = "start") %>%
                 resize(width = width(.) + expand_size, fix = "end")
 
-        tss_neg <- tss_granges[strand(tss_granges) == "-"] %>%
+        tss_neg <- grange[strand(grange) == "-"] %>%
                 resize(width = expand_size, fix = "end") %>%
                 resize(width = width(.) + expand_size, fix = "start")
 
