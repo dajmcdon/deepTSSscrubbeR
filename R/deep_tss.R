@@ -19,10 +19,6 @@ setClass(
 #' @export
 
 deep_tss <- function(TSSs) {
-	deep_tss_object <- new(
-		"deep_tss_object",
-		TSSs = TSSs
-	)
-
-	return(deep_tss_obejct)
+	deep_tss_object <- new("deep_tss_object", experiment = TSSs)
+	return(deep_tss_object)
 }
