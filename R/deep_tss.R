@@ -2,11 +2,13 @@ setClass(
 	"deep_tss_object",
 	representation(
 		experiment = "list",
+		status = "list",
 		indices = "list",
 		ranges = "list"
 	),
 	prototype(
 		experiment = list(),
+		status = list(),
 		indices = list(),
 		ranges = list()
 	)

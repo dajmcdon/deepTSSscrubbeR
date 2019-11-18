@@ -2,6 +2,7 @@
 
 export(deep_tss)
 export(expand_ranges)
+export(mark_status)
 importFrom(GenomicRanges,GRanges)
 importFrom(GenomicRanges,resize)
 importFrom(GenomicRanges,score)
