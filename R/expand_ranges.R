@@ -3,6 +3,7 @@
 #'
 #' Expand TSS GRanges for downstream analysis
 #'
+#' @importFrom magrittr %>%
 #' @importFrom GenomicRanges GRanges strand
 #' @importFrom purrr map
 #'
@@ -34,7 +35,8 @@ expand_ranges <- function(
 #'
 #' Backend function to expand granges
 #'
-#' @importFrom GenomicRanges GRanges strand resize sort
+#' @importFrom magrittr %>%
+#' @importFrom GenomicRanges GRanges strand resize sort width score
 #'
 #' @param grange GRange object to expand
 #' @param expand_size Size to expand ranges on each side of TSS
