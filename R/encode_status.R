@@ -22,5 +22,7 @@ encode_status <- function(experiment, reference_sample) {
 		})
 
 	experiment@status_encoded <- ref_sample
+	experiment@settings$reference_sample <- reference_sample
+
 	return(experiment)
 }

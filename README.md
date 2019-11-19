@@ -33,3 +33,10 @@ Set reference set to analyze, and encode the TSS status of that set
 ```
 tss_obj <- encode_status(tss_obj, reference_sample = "set_1")
 ```
+
+Get sequences using expanded GRanges, and then one-hot encode them
+
+```
+genome_assembly <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
+tss_obj <- retrieve_sequences(tss_obj, assembly = genome_assembly)
+```

@@ -6,7 +6,9 @@ setClass(
 		status = "list",
 		ranges = "list",
 		split = "list",
-		status_encoded = "list"
+		status_encoded = "list",
+		sequences = "list",
+		encoded_sequences = "list"
 	),
 	prototype(
 		experiment = list(),
@@ -14,7 +16,9 @@ setClass(
 		status = list(),
 		ranges = list(),
 		split = list(),
-		status_encoded = list()
+		status_encoded = list(),
+		sequences = list(),
+		encoded_sequences = list()
 	)
 )
 
