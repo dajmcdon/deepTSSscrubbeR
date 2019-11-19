@@ -22,3 +22,8 @@ Expand ranges for downstream analysis
 ```
 tss_obj <- expand_ranges(tss_obj, 10, 15)
 ```
+
+Split data into training and test sets
+
+```
+tss_obj <- split_data(tss_obj, train_split = 1000, test_split = 1000)

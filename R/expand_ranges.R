@@ -20,8 +20,8 @@ expand_ranges <- function(
 	sequence_expansion = 10,
 	signal_expansion = 15
 ) {
-	sequence_expanded <- map(experiment@experiment, ~ expand_range(.x, sequence_expansion))
-	signal_expanded <- map(experiment@experiment, ~ expand_range(.x, signal_expansion))
+	sequence_expanded <- map(experiment@status, ~ expand_range(.x, sequence_expansion))
+	signal_expanded <- map(experiment@status, ~ expand_range(.x, signal_expansion))
 
 	experiment@ranges <- list(
 		"sequence" = sequence_expanded,
@@ -53,10 +53,6 @@ expand_range <- function(grange, expand_size) {
                 resize(width = width(.) + expand_size, fix = "start")
 
         tss_ranges <- c(tss_pos, tss_neg) %>% sort
-
-        tss_status <- tss_ranges %>%
-                score %>%
-                {ifelse(. <= 3, 1, 0)}
 
         return(tss_ranges)
 }

@@ -3,14 +3,14 @@ setClass(
 	representation(
 		experiment = "list",
 		status = "list",
-		indices = "list",
-		ranges = "list"
+		ranges = "list",
+		split = "list"
 	),
 	prototype(
 		experiment = list(),
 		status = list(),
-		indices = list(),
-		ranges = list()
+		ranges = list(),
+		split = list()
 	)
 )
 
