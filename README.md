@@ -27,6 +27,7 @@ Split data into training and test sets
 
 ```
 tss_obj <- split_data(tss_obj, train_split = 1000, test_split = 1000)
+```
 
 Set reference set to analyze, and encode the TSS status of that set
 
