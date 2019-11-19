@@ -23,16 +23,16 @@ Expand ranges for downstream analysis
 tss_obj <- expand_ranges(tss_obj, sequence_expansion = 10, signal_expansion = 15)
 ```
 
-Split data into training and test sets
+Set reference set to analyze, and split data into training and test sets
 
 ```
-tss_obj <- split_data(tss_obj, train_split = 1000, test_split = 1000)
+tss_obj <- split_data(tss_obj, reference_sample = "set_1", train_split = 1000, test_split = 1000)
 ```
 
-Set reference set to analyze, and encode the TSS status of that set
+Encode the TSS status of sets
 
 ```
-tss_obj <- encode_status(tss_obj, reference_sample = "set_1")
+tss_obj <- encode_status(tss_obj)
 ```
 
 Get sequences using expanded GRanges, and then one-hot encode them

@@ -4,10 +4,12 @@
 \alias{split_data}
 \title{Train/Test Split}
 \usage{
-split_data(experiment, train_split, test_split)
+split_data(experiment, reference_sample, train_split, test_split)
 }
 \arguments{
 \item{experiment}{deep_tss object}
+
+\item{reference_sample}{Sample to analyze}
 
 \item{train_split}{Total number of TSSs to use on training set, split evenly between marked status}
 

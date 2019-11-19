@@ -4,12 +4,10 @@
 \alias{encode_status}
 \title{Encode TSS Status}
 \usage{
-encode_status(experiment, reference_sample)
+encode_status(experiment)
 }
 \arguments{
 \item{experiment}{deep_tss object}
-
-\item{reference_sample}{Main sample to be analyzed}
 }
 \value{
 status encoded into tensor in slot @status_encoded
