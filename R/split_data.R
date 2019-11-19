@@ -5,6 +5,7 @@
 #'
 #' @importFrom reticulate array_reshape
 #' @importFrom purrr map
+#' @importFrom GenomicRanges sort
 #'
 #' @param experiment deep_tss object
 #' @param train_split Total number of TSSs to use on training set, split evenly between marked status
@@ -28,13 +29,16 @@ split_data <- function(experiment, train_split, test_split) {
 			)
 			
 			split_list <- list(
-				"train_split" = x[train_index],
-				"test_split" = x[test_index]
+				"train_split" = sort(x[train_index]),
+				"test_split" = sort(x[test_index])
 			)
 
 			return(split_list)
 		})
 
 	experiment@split <- split
+	experiment@settings$train_split <- train_split
+	experiment@settings$test_split <- test_split
+
 	return(experiment)
 }

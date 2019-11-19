@@ -2,15 +2,19 @@ setClass(
 	"deep_tss_object",
 	representation(
 		experiment = "list",
+		settings = "list",
 		status = "list",
 		ranges = "list",
-		split = "list"
+		split = "list",
+		status_encoded = "list"
 	),
 	prototype(
 		experiment = list(),
+		settings = list(),
 		status = list(),
 		ranges = list(),
-		split = list()
+		split = list(),
+		status_encoded = list()
 	)
 )
 

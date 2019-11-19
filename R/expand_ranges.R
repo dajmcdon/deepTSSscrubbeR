@@ -27,6 +27,8 @@ expand_ranges <- function(
 		"sequence" = sequence_expanded,
 		"signal" = signal_expanded
 	)
+	experiment@settings$sequence_expansion <- sequence_expansion
+	experiment@settings$signal_expansion <- signal_expansion
 
 	return(experiment)
 }

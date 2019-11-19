@@ -21,5 +21,7 @@ mark_status <- function(experiment, threshold = 1) {
 		})
 	
 	experiment@status <- granges
+	experiment@settings$status_threshold <- threshold
+
 	return(experiment)
 }
