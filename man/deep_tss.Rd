@@ -4,10 +4,10 @@
 \alias{deep_tss}
 \title{deepTSSscrubbeR constructor function}
 \usage{
-deep_tss(TSSs)
+deep_tss(bam)
 }
 \arguments{
-\item{TSSs}{Named list of TSS granges}
+\item{bam}{Bam file from five-prime mapping data}
 }
 \description{
 deepTSSscrubbeR constructor function

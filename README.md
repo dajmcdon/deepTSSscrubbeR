@@ -1,14 +1,17 @@
 Read in the TSSs
 
 ```
-TSSs <- system.file("extdata", "TSSs.RDS", package = "deepTSSscrubbeR")
-TSSs <- readRDS(TSSs)
+library("reticulate")
+use_condaenv("keras")
+
+bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
+bam <- deep_tss(bam)
 ```
 
 Make a deepTSSscrubbeR object
 
 ```
-tss_obj <- deep_tss(TSSs)
+tss_obj <- deep_tss(bam)
 ```
 
 Mark likely spurious TSSs based on number of reads

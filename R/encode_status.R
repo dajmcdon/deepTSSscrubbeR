@@ -14,14 +14,16 @@
 #' @export
 
 encode_status <- function(experiment) {
-	ref_sample <- experiment@split[[reference_sample]] %>%
-		map(function(x) {
-			status_tensor <- array_reshape(x$status, dim = length(x$status))
-			return(status_tensor)
-		})
+
+	ref_sample <- experiment@split_index %>%
+		map(
+			~ experiment@status[[experiment@settings$reference_sample]][.x] %>%
+				sort %>%
+				.$status %>%
+				array_reshape(dim = length(.))
+		)
 
 	experiment@status_encoded <- ref_sample
-	experiment@settings$reference_sample <- reference_sample
 
 	return(experiment)
 }

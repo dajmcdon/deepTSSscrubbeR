@@ -28,7 +28,9 @@ split_data <- function(experiment, reference_sample, train_split, test_split) {
 		sample(which(select_sample$status == 1 & !(x$status %in% train_index)), size = ceiling(test_split / 2)),
 		sample(which(select_sample$status == 0 & !(x$status %in% train_index)), size = ceiling(test_split / 2))
 	)
-			
+	
+	split_index <- list("train_split" = train_index, "test_split" = test_index)
+		
 	split_list <- list(
 		"sequence" = list(
 			"train_split" = sort(experiment@ranges$sequence[[reference_sample]][train_index]),
@@ -36,12 +38,13 @@ split_data <- function(experiment, reference_sample, train_split, test_split) {
 		),
 		"signal" = list(
 			"train_split" = sort(experiment@ranges$signal[[reference_sample]][train_index]),
-			"test_spli" = sort(experiment@ranges$signal[[reference_sample]][test_index])
+			"test_split" = sort(experiment@ranges$signal[[reference_sample]][test_index])
 		)
 	)
 
+	experiment@split_index <- split_index
 	experiment@split <- split_list
-	experiment@reference_sample <- reference_sample
+	experiment@settings$reference_sample <- reference_sample
 	experiment@settings$train_split <- train_split
 	experiment@settings$test_split <- test_split
 
