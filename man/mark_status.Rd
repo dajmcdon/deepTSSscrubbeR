@@ -4,12 +4,14 @@
 \alias{mark_status}
 \title{Mark Status}
 \usage{
-mark_status(experiment, threshold = 1)
+mark_status(deep_obj, lower = 2, upper = 5)
 }
 \arguments{
-\item{experiment}{deep_tss object}
+\item{deep_obj}{deep_tss object}
 
-\item{threshold}{Reads less than or equal to threshold will be marked as spurious}
+\item{lower}{Reads less than or equal to 'lower' will be marked as spurious}
+
+\item{upper}{Reads greater than or equal to 'upper' will be marked as good}
 }
 \value{
 GRanges object with status column indicating spurious (1) or not (0)

@@ -6,6 +6,9 @@
 \usage{
 softclipped(deep_obj)
 }
+\arguments{
+\item{deep_obj}{deep_tss object}
+}
 \description{
 Extract softclipped bases from bam
 }

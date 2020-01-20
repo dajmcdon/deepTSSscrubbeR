@@ -4,11 +4,13 @@
 \alias{expand_ranges}
 \title{Expand Ranges}
 \usage{
-expand_ranges(experiment, sequence_expansion = 10,
-  signal_expansion = 15)
+expand_ranges(deep_obj, set = "building", sequence_expansion = 10,
+  signal_expansion = 10)
 }
 \arguments{
-\item{experiment}{deep_tss object}
+\item{deep_obj}{deep_tss object}
+
+\item{set}{Either 'building' for the train and test set, or 'all'}
 
 \item{sequence_expansion}{Number of bases to expand on each side for surrounding sequence analysis}
 

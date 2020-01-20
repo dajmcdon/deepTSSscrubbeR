@@ -4,10 +4,12 @@
 #' Expand TSS GRanges for downstream analysis
 #'
 #' @importFrom magrittr %>%
-#' @importFrom GenomicRanges GRanges strand
+#' @importFrom GenomicRanges GRanges strand makeGRangesFromDataFrame
+#' @importFrom dplyr filter
 #' @importFrom purrr map
 #'
-#' @param experiment deep_tss object
+#' @param deep_obj deep_tss object
+#' @param set Either 'building' for the train and test set, or 'all'
 #' @param sequence_expansion Number of bases to expand on each side for surrounding sequence analysis
 #' @param signal_expansion Number of bases to expand on each side for surrounding signal analysis
 #'
@@ -16,21 +18,26 @@
 #' @export
 
 expand_ranges <- function(
-	experiment,
+	deep_obj,
+	set = "building",
 	sequence_expansion = 10,
-	signal_expansion = 15
+	signal_expansion = 10
 ) {
-	sequence_expanded <- map(experiment@status, ~ expand_range(.x, sequence_expansion))
-	signal_expanded <- map(experiment@status, ~ expand_range(.x, signal_expansion))
+	sliced <- deep_obj@experiment %>%
+		filter(index %in% c("train", "test")) %>%
+		makeGRangesFromDataFrame(keep.extra.columns = TRUE)
 
-	experiment@ranges <- list(
+	sequence_expanded <- expand_range(sliced, sequence_expansion)
+	signal_expanded <- expand_range(sliced, signal_expansion)
+
+	deep_obj@ranges <- list(
 		"sequence" = sequence_expanded,
 		"signal" = signal_expanded
 	)
-	experiment@settings$sequence_expansion <- sequence_expansion
-	experiment@settings$signal_expansion <- signal_expansion
+	deep_obj@settings$sequence_expansion <- sequence_expansion
+	deep_obj@settings$signal_expansion <- signal_expansion
 
-	return(experiment)
+	return(deep_obj)
 }
 
 #' Expand Ranges Function

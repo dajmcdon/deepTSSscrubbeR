@@ -48,9 +48,10 @@ deep_tss <- function(bam) {
 	bam <- tibble(
 		qname = pluck(bam, "qname"),
 		flag = pluck(bam, "flag"),
-		rname = pluck(bam, "rname"),
+		seqnames = pluck(bam, "rname"),
 		strand = pluck(bam, "strand"),
-		pos = pluck(bam, "pos"),
+		bam_start = pluck(bam, "pos"),
+		width = 1,
 		cigar = pluck(bam, "cigar"),
 		seq = pluck(bam, "seq")
 	)

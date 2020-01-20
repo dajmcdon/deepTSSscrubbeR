@@ -5,7 +5,6 @@ library("reticulate")
 use_condaenv("keras")
 
 bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
-bam <- deep_tss(bam)
 ```
 
 Make a deepTSSscrubbeR object
@@ -14,22 +13,36 @@ Make a deepTSSscrubbeR object
 tss_obj <- deep_tss(bam)
 ```
 
+Analyze 5' ends for soft clipped bases
+
+```
+tss_obj <- softclipped(tss_obj)
+```
+
 Mark likely spurious TSSs based on number of reads
 
 ```
-tss_obj <- mark_status(tss_obj, threshold = 2)
+tss_obj <- mark_status(tss_obj, lower = 2, upper = 5)
+```
+
+split data into training and test sets
+
+```
+tss_obj <- split_data(tss_obj, train_split = 1000, test_split = 1000)
 ```
 
 Expand ranges for downstream analysis
 
 ```
-tss_obj <- expand_ranges(tss_obj, sequence_expansion = 10, signal_expansion = 15)
+tss_obj <- expand_ranges(tss_obj, sequence_expansion = 10, signal_expansion = 10)
 ```
 
-Set reference set to analyze, and split data into training and test sets
+Get sequences for ranges
 
 ```
-tss_obj <- split_data(tss_obj, reference_sample = "set_1", train_split = 1000, test_split = 1000)
+assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR") 
+
+tss_obj <- get_sequences(tss_obj, assembly_fasta)
 ```
 
 Encode the TSS status of sets

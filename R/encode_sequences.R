@@ -1,30 +1,31 @@
-
 #' Retrieve Sequences
 #'
-#' Retrieve sequences for expanded GRanges
+#' Retrieve sequences for expanded ranges
 #'
-#' @importFrom purrr map
+#' @import tibble
 #' @importFrom GenomicRanges GRanges
-#' @importFrom Rsamtools FaFile getSeq
+#' @importFrom Rsamtools FaFile
+#' @importFrom Biostrings getSeq
 #'
-#' @param experiment deep_tss object
-#' @param assembly File path to genome assembly
+#' @param deep_obj dep_tss object
+#' @param assembly Path to genome assembly
 #'
-#' @return Sequences stored in @sequences
+#' @rdname get_sequences-function
 #'
 #' @export
 
-retrieve_sequences <- function(experiment, assembly) {
-	genome_assembly <- FaFile(assembly)
+get_sequences <- function(deep_obj, assembly) {
+        genome <- FaFile(assembly)
 
-	seq_data <- experiment@split$sequence %>%
-		map(~ getSeq(genome_assembly, .))
+        seqs <- deep_obj@ranges$sequence %>%
+                getSeq(genome, .) %>%
+                as.character %>%
+                set_names(NULL)
 
-	experiment@sequences <- seq_data
-	experiment@settings$assembly <- assembly
-
-	return(experiment)
+        deep_obj@ranges$sequence$seq <- seqs
+        return(deep_obj)
 }
+
 
 #' One Hot Encode a Sequence
 #'
@@ -38,15 +39,14 @@ retrieve_sequences <- function(experiment, assembly) {
 #'
 #' @return one hot encoded sequence
 
-one_hot_seqs <- function(sequence, length) {
-	split_seq <- sequence %>%
-		str_split(pattern = "") %>%
-		unlist
-
-	one_hot_seq <- c("A", "T", "G", "C") %>%
-		map(~ {split_seq == .x} %>% as.numeric) %>%
-		do.call(rbind, .) %>%
-		array_reshape(dim = c(4, length))
+one_hot_seqs <- function(sequence) {
+	one_hot_seq <- sequence %>%
+		str_split(pattern = "", simplify = TRUE) %>%
+		factor(levels = c("A", "T", "G", "C", "N")) %>%
+		data.frame("seq" = .) %>%
+		model.matrix(~ 0 + seq, data = .) %>%
+		t %>%
+		array_reshape(dim = c(5, ncol(.)))
 
 	return(one_hot_seq)
 }
@@ -64,10 +64,8 @@ one_hot_seqs <- function(sequence, length) {
 #'
 #' @export
 
-encode_sequences <- function(experiment) {
-	encoded_sequences <- experiment@sequences %>%
-		map(
-			~ as.character(.x) %>% as.character %>%
-				map(~ one_hot_seqs(.))
-		)
+encode_sequences <- function(deep_obj) {
+	encoded_sequences <- deep_obj@sequences %>%
+		map()
+			
 }

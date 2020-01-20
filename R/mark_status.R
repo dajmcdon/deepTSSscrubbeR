@@ -3,25 +3,23 @@
 #'
 #' Mark status as spurious based on read threshold
 #'
-#' @importFrom GenomicRanges GRanges score
-#' @importFrom purrr map
+#' @importFrom dplyr mutate case_when
 #'
-#' @param experiment deep_tss object
-#' @param threshold Reads less than or equal to threshold will be marked as spurious
+#' @param deep_obj deep_tss object
+#' @param lower Reads less than or equal to 'lower' will be marked as spurious
+#' @param upper Reads greater than or equal to 'upper' will be marked as good
 #'
 #' @return GRanges object with status column indicating spurious (1) or not (0)
 #'
 #' @export
 
-mark_status <- function(experiment, threshold = 1) {
-	granges <- experiment@experiment %>%
-		map(function(x) {
-			x$status <- ifelse(score(x) <= threshold, 1, 0)
-			return(x)
-		})
-	
-	experiment@status <- granges
-	experiment@settings$status_threshold <- threshold
+mark_status <- function(deep_obj, lower = 2, upper = 5) {
+	status_marked <- deep_obj@experiment %>%
+		mutate("status" = case_when(
+			score <= lower ~ 0,
+			score >= upper ~ 1
+		))
 
-	return(experiment)
+	deep_obj@experiment <- status_marked
+	return(deep_obj)
 }
