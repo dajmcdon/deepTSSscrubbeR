@@ -14,9 +14,9 @@ LazyData: true
 RoxygenNote: 6.1.1
 Collate: 
     'deep_tss.R'
-    'encode_sequences.R'
-    'encode_status.R'
+    'encode.R'
     'expand_ranges.R'
     'mark_status.R'
     'softclip.R'
     'split_data.R'
+    'surrounding_signal.R'

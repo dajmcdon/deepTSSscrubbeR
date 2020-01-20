@@ -37,7 +37,7 @@ Expand ranges for downstream analysis
 tss_obj <- expand_ranges(tss_obj, sequence_expansion = 10, signal_expansion = 10)
 ```
 
-Get sequences for ranges
+Get genomic sequences for ranges
 
 ```
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR") 
@@ -45,15 +45,19 @@ assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deep
 tss_obj <- get_sequences(tss_obj, assembly_fasta)
 ```
 
-Encode the TSS status of sets
+Encode the genomic sequences
+
+```
+tss_obj <- encode_genomic(tss_obj)
+```
+
+Encode soft-clipped bases
+
+```
+tss_obj <- encode_soft(tss_obj)
+```
+
+Encode TSS status
 
 ```
 tss_obj <- encode_status(tss_obj)
-```
-
-Get sequences using expanded GRanges, and then one-hot encode them
-
-```
-genome_assembly <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
-tss_obj <- retrieve_sequences(tss_obj, assembly = genome_assembly)
-```

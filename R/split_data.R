@@ -4,6 +4,7 @@
 #' Split data into training and test set
 #'
 #' @importFrom dplyr mutate
+#' @importFrom GenomicRanges GRanges makeGRangesFromDataFrame
 #'
 #' @param deep_obj deep_tss object
 #' @param train_split Total number of TSSs to use on training set, split evenly between marked status
@@ -31,6 +32,9 @@ split_data <- function(deep_obj, train_split, test_split) {
 	select_sample[train_index, "index"] <- "train"
 	select_sample[test_index, "index"] <- "test"
 	
+	gr <- makeGRangesFromDataFrame(select_sample, keep.extra.columns = TRUE)
+
+	deep_obj@ranges$all <- gr
 	deep_obj@experiment <- select_sample
 	return(deep_obj)
 }

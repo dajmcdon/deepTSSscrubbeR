@@ -3,24 +3,14 @@ setClass(
 	representation(
 		experiment = "data.frame",
 		settings = "list",
-		status = "list",
 		ranges = "list",
-		split_index = "list",
-		split = "list",
-		status_encoded = "list",
-		sequences = "list",
-		encoded_sequences = "list"
+		encoded = "list"
 	),
 	prototype(
 		experiment = data.frame(),
 		settings = list(),
-		status = list(),
 		ranges = list(),
-		split_index = list(),
-		split = list(),
-		status_encoded = list(),
-		sequences = list(),
-		encoded_sequences = list()
+		encoded = list()
 	)
 )
 

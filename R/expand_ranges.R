@@ -30,10 +30,9 @@ expand_ranges <- function(
 	sequence_expanded <- expand_range(sliced, sequence_expansion)
 	signal_expanded <- expand_range(sliced, signal_expansion)
 
-	deep_obj@ranges <- list(
-		"sequence" = sequence_expanded,
-		"signal" = signal_expanded
-	)
+	deep_obj@ranges$sequence <- sequence_expanded
+	deep_obj@ranges$signal <- signal_expanded
+
 	deep_obj@settings$sequence_expansion <- sequence_expansion
 	deep_obj@settings$signal_expansion <- signal_expansion
 
