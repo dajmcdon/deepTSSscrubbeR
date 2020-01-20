@@ -45,6 +45,12 @@ assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deep
 tss_obj <- get_sequences(tss_obj, assembly_fasta)
 ```
 
+Get surrounding signal
+
+```
+tss_obj <- get_signal(tss_obj)
+```
+
 Encode the genomic sequences
 
 ```
@@ -61,3 +67,10 @@ Encode TSS status
 
 ```
 tss_obj <- encode_status(tss_obj)
+```
+
+Encode signal around TSS
+
+```
+tss_obj <- encode_signal(tss_obj)
+```
