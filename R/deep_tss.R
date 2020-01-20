@@ -1,7 +1,7 @@
 setClass(
 	"deep_tss",
 	representation(
-		experiment = "list",
+		experiment = "data.frame",
 		settings = "list",
 		status = "list",
 		ranges = "list",
@@ -12,7 +12,7 @@ setClass(
 		encoded_sequences = "list"
 	),
 	prototype(
-		experiment = list(),
+		experiment = data.frame(),
 		settings = list(),
 		status = list(),
 		ranges = list(),
@@ -27,6 +27,8 @@ setClass(
 #' deepTSSscrubbeR constructor function
 #'
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
+#' @import tibble
+#' @importFrom purrr pluck
 #'
 #' @param bam Bam file from five-prime mapping data
 #'
@@ -43,9 +45,16 @@ deep_tss <- function(bam) {
 	bam <- scanBam(bam, param = params)[[1]]
 	bam$seq <- as.character(bam$seq)
 
-	bam <- bam %>%
-		stack %>% unstack %>%
-		as_tibble(.name_repair = "unique")
+	bam <- tibble(
+		qname = pluck(bam, "qname"),
+		flag = pluck(bam, "flag"),
+		rname = pluck(bam, "rname"),
+		strand = pluck(bam, "strand"),
+		pos = pluck(bam, "pos"),
+		cigar = pluck(bam, "cigar"),
+		seq = pluck(bam, "seq")
+	)
+			
 
 	deep_tss_object <- new("deep_tss", experiment = bam)
 	return(deep_tss_object)
