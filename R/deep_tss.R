@@ -19,6 +19,7 @@ setClass(
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
 #' @import tibble
 #' @importFrom purrr pluck
+#' @importFrom dplyr mutate left_join mutate_if
 #'
 #' @param bam Bam file from five-prime mapping data
 #'
@@ -26,27 +27,38 @@ setClass(
 
 deep_tss <- function(bam) {
 	
-	params = ScanBamParam(
-		what = c("qname", "flag", "rname", "strand", "pos", "cigar", "seq"),
+	## Get bam pair info.
+	bampe <- readGAlignmentPairs(bam, use.names = TRUE) %>%
+		as.data.frame %>%
+		as_tibble(rownames = "qname")
+
+	## Get bam first in read seq.
+	params <- ScanBamParam(
+		what = c("qname", "flag", "seq"),
 		reverseComplement = TRUE,
 		flag = scanBamFlag(isFirstMateRead = TRUE)
 	)
 
-	bam <- scanBam(bam, param = params)[[1]]
-	bam$seq <- as.character(bam$seq)
+	bamseq <- scanBam(bam, param = params)[[1]]
+	bamseq$seq <- as.character(bamseq$seq)
 
-	bam <- tibble(
-		qname = pluck(bam, "qname"),
-		flag = pluck(bam, "flag"),
-		seqnames = pluck(bam, "rname"),
-		strand = pluck(bam, "strand"),
-		bam_start = pluck(bam, "pos"),
-		width = 1,
-		cigar = pluck(bam, "cigar"),
-		seq = pluck(bam, "seq")
+	bamseq <- tibble(
+		qname = pluck(bamseq, "qname"),
+		flag_firstinread = pluck(bamseq, "flag"),
+		seq_firstinread = pluck(bamseq, "seq")
 	)
-			
+	
+	## Combine paired bam and bam seq info.
+	combined <- left_join(bampe, bamseq, by = "qname") %>%
+		mutate(
+			"start" = ifelse(flag_firstinread == "99", start.first, end.first),
+			"end" = start,
+			"strand" = strand.first,
+			"seqnames" = seqnames.first
+		) %>%
+		mutate_if(is.integer, as.double) %>%
+		mutate_if(is.factor, as.character)
 
-	deep_tss_object <- new("deep_tss", experiment = bam)
+	deep_tss_object <- new("deep_tss", experiment = combined)
 	return(deep_tss_object)
 }

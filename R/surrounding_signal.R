@@ -8,14 +8,15 @@
 #' @importFrom tidyr complete pivot_wider
 #' @importFrom GenomicRanges GRanges makeGRangesFromDataFrame
 #' @importFrom IRanges findOverlapPairs
+#' @importFrom purrr map map2
 #'
 #' @rdname get_signal-function
 #'
 #' @export
 
 get_signal <- function(deep_obj) {
-	overlaps <- deep_obj@ranges$signal %>%
-		findOverlapPairs(deep_obj@ranges$all) %>%
+	overlaps <- map(deep_obj@ranges$signal,
+		~ findOverlapPairs(., deep_obj@ranges$all) %>%
 		as.data.frame %>%
 		as_tibble(.name_repair = "unique") %>%
 		select(
@@ -31,11 +32,12 @@ get_signal <- function(deep_obj) {
 			first.X.end - second.X.start
 		)) %>%
 		select(-second.X.start)
+	)
 
 	signal_length <- deep_obj@settings$signal_expansion * 2
 
-	positions <- overlaps %>%
-		count(
+	positions <- map(overlaps,
+		~ count(.,
 			first.X.qname, first.X.seqnames, first.X.start,
 			first.X.end, first.X.strand, position
 		) %>%
@@ -48,11 +50,13 @@ get_signal <- function(deep_obj) {
 		select(first.X.qname, position, n) %>%
 		rename("qname" = first.X.qname) %>%
 		pivot_wider(names_from = position, values_from = n)
+	)
 
-	overlap <- deep_obj@ranges$signal %>%
-		as_tibble(.name_repair = "unique") %>%
-		left_join(positions, by = "qname") %>%
-		makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+	overlap <-map2(deep_obj@ranges$signal, positions,
+		~ as_tibble(.x, .name_repair = "unique") %>%
+			left_join(.y, by = "qname") %>%
+			makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+	)
 
 	deep_obj@ranges$signal <- overlap
 	return(deep_obj)

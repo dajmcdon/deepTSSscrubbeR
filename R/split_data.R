@@ -33,8 +33,11 @@ split_data <- function(deep_obj, train_split, test_split) {
 	select_sample[test_index, "index"] <- "test"
 	
 	gr <- makeGRangesFromDataFrame(select_sample, keep.extra.columns = TRUE)
+	gr_train <- gr[!is.na(gr$index) & gr$index == "train"]
+	gr_test <- gr[!is.na(gr$index) & gr$index == "test"]
 
 	deep_obj@ranges$all <- gr
+	deep_obj@ranges$subset <- list("train" = gr_train, "test" = gr_test)
 	deep_obj@experiment <- select_sample
 	return(deep_obj)
 }

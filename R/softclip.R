@@ -24,32 +24,21 @@ softclipped <- function(deep_obj) {
 		{. == "-"}
 
 	soft_bases <- deep_obj@experiment %>%
-		pull(cigar) %>%
+		pull(cigar.first) %>%
 		str_extract_all("(\\d+\\w)") %>%
 		map2_chr(neg_strand, function(x, y) {
 			if (y) x <- rev(x)
 			return(x[1])
 		})
 
-	soft_bases <- deep_obj@experiment %>%
+	soft <- deep_obj@experiment %>%
 		add_column("fiveprime_cigar" = soft_bases) %>%
 		mutate("fiveprime_soft" = str_match(fiveprime_cigar, "^(\\d+)S")[,2] %>% as.double) %>%
 		replace_na(list(fiveprime_soft = 0)) %>%
-		mutate_if(is.integer, as.double) %>%
-		mutate_if(is.factor, as.character) %>%
-		mutate(
-			"soft_bases" = ifelse(fiveprime_soft == 0, NA, str_sub(seq, end = fiveprime_soft)),
-			"start" = case_when(
-				fiveprime_soft > 0 & strand == "+" ~ (bam_start + fiveprime_soft),
-				fiveprime_soft > 0 & strand == "-" ~ (bam_start - fiveprime_soft),
-				fiveprime_soft == 0 ~ bam_start
-			),
-			"end" = start
-		) %>%
-		select(-seq) %>%
+		mutate("soft_bases" = ifelse(fiveprime_soft == 0, NA, str_sub(seq_firstinread, end = fiveprime_soft))) %>%
 		add_count(seqnames, strand, start, name = "score")
 		
 	
-	deep_obj@experiment <- soft_bases
+	deep_obj@experiment <- soft
 	return(deep_obj)
 }
