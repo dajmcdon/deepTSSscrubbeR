@@ -4,13 +4,17 @@ setClass(
 		experiment = "data.frame",
 		settings = "list",
 		ranges = "list",
-		encoded = "list"
+		encoded = "list",
+		model = "list",
+		results = "list"
 	),
 	prototype(
 		experiment = data.frame(),
 		settings = list(),
 		ranges = list(),
-		encoded = list()
+		encoded = list(),
+		model = list(),
+		results = list()
 	)
 )
 
@@ -20,6 +24,7 @@ setClass(
 #' @import tibble
 #' @importFrom purrr pluck
 #' @importFrom dplyr mutate left_join mutate_if
+#' @importFrom GenomicAlignments readGAlignmentPairs
 #'
 #' @param bam Bam file from five-prime mapping data
 #'

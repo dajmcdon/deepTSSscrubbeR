@@ -1,3 +1,41 @@
+# deepTSSscrubbeR
+
+Clean potential spurious TSSs from TSRT based experiments.
+
+## Quick Start
+
+``
+library("reticulate")
+use_condaenv("keras")
+library("magrittr")
+
+bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
+assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
+
+tss_obj <- deep_tss(bam) %>%
+	softclipped %>%
+	mark_status(lower = 2, upper = 5) %>%
+	split_data(train_split = 1000, test_split = 1000) %>%
+	expand_ranges(sequence_expansion = 10, signal_expansion = 10) %>%
+	get_sequences(assembly_fasta) %>%
+	get_signal %>%
+
+tss_encoded <- tss_obj %>%
+	encode_genomic %>%
+	encode_soft %>%
+	encode_signal %>%
+	encode_status
+
+deep_model <- tss_encoded %>%
+	tss_model %>%
+	tss_train %>%
+	tss_evaluate %>%
+	tss_predict
+
+``
+
+## Detailed
+
 Read in the TSSs
 
 ```
@@ -74,3 +112,5 @@ Encode signal around TSS
 ```
 tss_obj <- encode_signal(tss_obj)
 ```
+
+

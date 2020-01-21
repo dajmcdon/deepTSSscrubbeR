@@ -16,7 +16,7 @@
 
 get_signal <- function(deep_obj) {
 	overlaps <- map(deep_obj@ranges$signal,
-		~ findOverlapPairs(., deep_obj@ranges$all) %>%
+		~ findOverlapPairs(., deep_obj@ranges$original$all) %>%
 		as.data.frame %>%
 		as_tibble(.name_repair = "unique") %>%
 		select(
@@ -52,7 +52,7 @@ get_signal <- function(deep_obj) {
 		pivot_wider(names_from = position, values_from = n)
 	)
 
-	overlap <-map2(deep_obj@ranges$signal, positions,
+	overlap <- map2(deep_obj@ranges$signal, positions,
 		~ as_tibble(.x, .name_repair = "unique") %>%
 			left_join(.y, by = "qname") %>%
 			makeGRangesFromDataFrame(keep.extra.columns = TRUE)

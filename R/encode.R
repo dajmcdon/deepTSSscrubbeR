@@ -29,8 +29,12 @@ one_hot_seqs <- function(sequence) {
 #' One hot encode the genomic sequences from the expanded ranges
 #'
 #' @import tibble
+#' @import caret
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
+#' @importFrom dplyr mutate_all
+#' @importFrom stringr str_pad
+#' @importFrom tidyr separate
 #' @importFrom reticulate array_reshape
 #'
 #' @param deep_obj deep_tss object
@@ -47,23 +51,30 @@ encode_genomic <- function(deep_obj) {
 	encoded_sequences <- map(
 		deep_obj@ranges$sequence,
 		~ as_tibble(., .name_repair = "unique") %>%
-		pmap(function(...) {
-			args <- list(...)
-			onehot <- one_hot_seqs(args$seqs)
-			return(onehot)
-		}) %>%
-		array_reshape(dim = c(length(.), 6, sequence_length, 1))
+			select(seqs) %>%
+			separate(seqs, 1:sequence_length, into = sprintf("P%s", 1:sequence_length)) %>%
+			mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N")))
 	)
 
-	deep_obj@encoded$genomic <- encoded_sequences
+	onehot <- map(
+		encoded_sequences,
+		~ dummyVars(' ~ .', data = .x) %>%
+			predict(newdata = .x) %>%
+			as_tibble(.name_repair = "unique") %>%
+			as.matrix %>%
+			array_reshape(dim = c(nrow(.), sequence_length, 5, 1))
+	)
+
+	deep_obj@encoded$genomic <- onehot
 	return(deep_obj)
 }
 
-#' One Hoe Encode Soft-clipped Bases
+#' One Hot Encode Soft-clipped Bases
 #'
 #' One hot encode the soft-clipped sequences from the bam file
 #'
 #' @import tibble
+#' @import caret
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
 #' @importFrom stringr str_pad
@@ -79,21 +90,36 @@ encode_soft <- function(deep_obj) {
 	encoded_soft <- map(
 		deep_obj@ranges$sequence,
 		~ as_tibble(., .name_repair = "unique") %>%
-		pmap(function(...) {
-			args <- list(...)
-			if (is.na(args$soft_bases)) {
-				soft <- "UUU"
-			} else {
-				soft <- str_pad(args$soft_bases, 3, "right", "U")
-			}
-			onehot <- one_hot_seqs(soft)
-			return(onehot)
-		}) %>%
-		array_reshape(dim = c(length(.), 6, 3, 1))
+			select(soft_bases) %>%
+			mutate(
+				soft_bases = replace_na(soft_bases, "U"),
+				soft_bases = str_pad(soft_bases, 3, "right", "U")
+			) %>%
+			separate(soft_bases, 1:3, into = sprintf("P%s", 1:3)) %>%
+			mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N", "U")))
 	)
 
-	deep_obj@encoded$softclipped <- encoded_soft
+	onehot <- map(
+                encoded_soft,
+                ~ dummyVars(' ~ .', data = .x) %>%
+                        predict(newdata = .x) %>%
+                        as_tibble(.name_repair = "unique") %>%
+                        as.matrix %>%
+                        array_reshape(dim = c(nrow(.), 3, 6, 1))
+        )
+
+
+	deep_obj@encoded$softclipped <- onehot
 	return(deep_obj)
+
+#	                select(soft_bases) %>%
+#               mutate(
+#                      soft_bases = replace_na(soft_bases, "U"),
+#                     soft_bases = str_pad(soft_bases, 3, "right", "U")
+#            ) %>%
+#           separate(soft_bases, 1:3, into = sprintf("P%s", 1:3)) %>%
+#          mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N", "U")))
+
 }
 
 #' Encode TSS Status
@@ -102,6 +128,7 @@ encode_soft <- function(deep_obj) {
 #'
 #' @import tibble
 #' @importFrom GenomicRanges GRanges
+#' @importFrom magrittr %>% extract
 #' @importFrom reticulate array_reshape
 #' @importFrom purrr map
 #'
@@ -112,12 +139,13 @@ encode_soft <- function(deep_obj) {
 #' @export
 
 encode_status <- function(deep_obj) {
-	status <- map(
-		deep_obj@ranges$sequence,
-		~ as_tibble(., .name_repair = "unique") %>%
-		pull(status) %>%
-		array_reshape(length(.))
-	)
+	status <- deep_obj@ranges$sequence %>%
+		extract(c("train", "test")) %>%
+		map(
+			~ as_tibble(., .name_repair = "unique") %>%
+			pull(status) %>%
+			array_reshape(length(.))
+		)	
 
 	deep_obj@encoded$status <- status
 	return(deep_obj)
@@ -143,7 +171,7 @@ encode_signal <- function(deep_obj) {
 		select(matches("X\\d+$")) %>%
 		mutate_all(~ ifelse(. > 0, 1, 0)) %>%
 		as.matrix %>%
-		array_reshape(dim = c(nrow(.), 1, ncol(.)))
+		array_reshape(dim = c(nrow(.), 1, ncol(.), 1))
 	)
 
 	deep_obj@encoded$signal <- signal

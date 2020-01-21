@@ -22,11 +22,11 @@ expand_ranges <- function(
 	signal_expansion = 10
 ) {
 
-	sequence_expanded <- deep_obj@ranges$subset %>%
-		expand_range(., sequence_expansion)
+	sequence_expanded <- deep_obj@ranges$original %>%
+		expand_range(sequence_expansion)
 
-	signal_expanded <- deep_obj@ranges$subset %>%
-		expand_range(., signal_expansion)
+	signal_expanded <- deep_obj@ranges$original %>%
+		expand_range(signal_expansion)
 
 	deep_obj@ranges$sequence <- sequence_expanded
 	deep_obj@ranges$signal <- signal_expanded

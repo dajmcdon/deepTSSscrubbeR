@@ -36,8 +36,10 @@ split_data <- function(deep_obj, train_split, test_split) {
 	gr_train <- gr[!is.na(gr$index) & gr$index == "train"]
 	gr_test <- gr[!is.na(gr$index) & gr$index == "test"]
 
-	deep_obj@ranges$all <- gr
-	deep_obj@ranges$subset <- list("train" = gr_train, "test" = gr_test)
+	deep_obj@ranges$original$all <- gr
+	deep_obj@ranges$original$train <- gr_train
+	deep_obj@ranges$original$test <- gr_test
 	deep_obj@experiment <- select_sample
+
 	return(deep_obj)
 }

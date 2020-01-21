@@ -2,7 +2,7 @@
 % Please edit documentation in R/encode.R
 \name{encode_soft}
 \alias{encode_soft}
-\title{One Hoe Encode Soft-clipped Bases}
+\title{One Hot Encode Soft-clipped Bases}
 \usage{
 encode_soft(deep_obj)
 }

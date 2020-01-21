@@ -27,6 +27,7 @@ get_sequences <- function(deep_obj, assembly) {
 
 	deep_obj@ranges$sequence$train$seqs <- seqs$train
 	deep_obj@ranges$sequence$test$seqs <- seqs$test
+	deep_obj@ranges$sequence$all$seqs <- seqs$all
 
         return(deep_obj)
 }
