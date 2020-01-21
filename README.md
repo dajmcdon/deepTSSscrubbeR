@@ -4,7 +4,7 @@ Clean potential spurious TSSs from TSRT based experiments.
 
 ## Quick Start
 
-``
+```
 library("reticulate")
 use_condaenv("keras")
 library("magrittr")
@@ -32,7 +32,7 @@ deep_model <- tss_encoded %>%
 	tss_evaluate %>%
 	tss_predict
 
-``
+```
 
 ## Detailed
 
