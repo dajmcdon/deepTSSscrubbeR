@@ -23,12 +23,10 @@ get_sequences <- function(deep_obj, assembly) {
                         ~ getSeq(genome, .) %>%
                         as.character %>%
                         set_names(NULL)
-                ) %>%
-                map2(deep_obj@ranges$sequence, function(x, y) {
-                        y$seq <- x
-                        return(y)
-                })
+                )
 
-        deep_obj@ranges$sequence$seq <- seqs
+	deep_obj@ranges$sequence$train$seqs <- seqs$train
+	deep_obj@ranges$sequence$test$seqs <- seqs$test
+
         return(deep_obj)
 }

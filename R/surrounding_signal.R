@@ -34,7 +34,7 @@ get_signal <- function(deep_obj) {
 		select(-second.X.start)
 	)
 
-	signal_length <- deep_obj@settings$signal_expansion * 2
+	signal_length <- (deep_obj@settings$signal_expansion * 2) + 1
 
 	positions <- map(overlaps,
 		~ count(.,

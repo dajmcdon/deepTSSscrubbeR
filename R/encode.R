@@ -30,7 +30,7 @@ one_hot_seqs <- function(sequence) {
 #'
 #' @import tibble
 #' @importFrom GenomicRanges GRanges
-#' @importFrom purrr pmap
+#' @importFrom purrr pmap map
 #' @importFrom reticulate array_reshape
 #'
 #' @param deep_obj deep_tss object
@@ -42,16 +42,18 @@ one_hot_seqs <- function(sequence) {
 #' @export
 
 encode_genomic <- function(deep_obj) {
-	sequence_length <- deep_obj@settings$sequence_expansion * 2
+	sequence_length <- (deep_obj@settings$sequence_expansion * 2) + 1
 
-	encoded_sequences <- deep_obj@ranges$sequence %>%
-		as_tibble(.name_repair = "unique") %>%
+	encoded_sequences <- map(
+		deep_obj@ranges$sequence,
+		~ as_tibble(., .name_repair = "unique") %>%
 		pmap(function(...) {
 			args <- list(...)
-			onehot <- one_hot_seqs(args$seq)
+			onehot <- one_hot_seqs(args$seqs)
 			return(onehot)
 		}) %>%
 		array_reshape(dim = c(length(.), 6, sequence_length, 1))
+	)
 
 	deep_obj@encoded$genomic <- encoded_sequences
 	return(deep_obj)
@@ -63,7 +65,7 @@ encode_genomic <- function(deep_obj) {
 #'
 #' @import tibble
 #' @importFrom GenomicRanges GRanges
-#' @importFrom purrr pmap
+#' @importFrom purrr pmap map
 #' @importFrom stringr str_pad
 #' @importFrom reticulate array_reshape
 #'
@@ -74,8 +76,9 @@ encode_genomic <- function(deep_obj) {
 #' @export
 
 encode_soft <- function(deep_obj) {
-	encoded_soft <- deep_obj@ranges$sequence %>%
-		as_tibble(.name_repair = "unique") %>%
+	encoded_soft <- map(
+		deep_obj@ranges$sequence,
+		~ as_tibble(., .name_repair = "unique") %>%
 		pmap(function(...) {
 			args <- list(...)
 			if (is.na(args$soft_bases)) {
@@ -87,6 +90,7 @@ encode_soft <- function(deep_obj) {
 			return(onehot)
 		}) %>%
 		array_reshape(dim = c(length(.), 6, 3, 1))
+	)
 
 	deep_obj@encoded$softclipped <- encoded_soft
 	return(deep_obj)
@@ -99,6 +103,7 @@ encode_soft <- function(deep_obj) {
 #' @import tibble
 #' @importFrom GenomicRanges GRanges
 #' @importFrom reticulate array_reshape
+#' @importFrom purrr map
 #'
 #' @param deep_obj deep_tss object
 #'
@@ -107,10 +112,12 @@ encode_soft <- function(deep_obj) {
 #' @export
 
 encode_status <- function(deep_obj) {
-	status <- deep_obj@ranges$sequence %>%
-		as_tibble(.name_repair = "unique") %>%
+	status <- map(
+		deep_obj@ranges$sequence,
+		~ as_tibble(., .name_repair = "unique") %>%
 		pull(status) %>%
 		array_reshape(length(.))
+	)
 
 	deep_obj@encoded$status <- status
 	return(deep_obj)
@@ -122,7 +129,7 @@ encode_status <- function(deep_obj) {
 #'
 #' @import tibble
 #' @importFrom GenomicRanges GRanges
-#' @importFrom dplyr select matches
+#' @importFrom dplyr select matches mutate_all
 #' @importFrom reticulate array_reshape
 #'
 #' @rdname encode_signal-function
@@ -130,12 +137,14 @@ encode_status <- function(deep_obj) {
 #' @export
 
 encode_signal <- function(deep_obj) {
-	signal <- deep_obj@ranges$signal %>%
-		as_tibble(.name_repair = "unique") %>%
+	signal <- map(
+		deep_obj@ranges$signal,
+		~ as_tibble(., .name_repair = "unique") %>%
 		select(matches("X\\d+$")) %>%
 		mutate_all(~ ifelse(. > 0, 1, 0)) %>%
 		as.matrix %>%
 		array_reshape(dim = c(nrow(.), 1, ncol(.)))
+	)
 
 	deep_obj@encoded$signal <- signal
 	return(deep_obj)
