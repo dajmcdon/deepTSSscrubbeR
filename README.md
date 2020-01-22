@@ -1,6 +1,25 @@
 # deepTSSscrubbeR
 
-Clean potential spurious TSSs from TSRT based experiments.
+Provide confidence levels to TSSs as not being artifacts.
+
+## About
+
+Template Switching Reverse Transcription (TSRT) based 5' mapping technologies such as RAMPAGE, STRIPE-seq, and nanoCAGE
+have gained favor because of their low input requirments and/or relative simplicity.
+However, certain artifacts tend to be somewhat common in the results of these methods.
+These artifacts can include strand invasion (invasion of the template switching primer into the extending cDNA),
+template switching at uncapped ends (although with less probability than capped ends),
+and the addition of an extra cytidine to the 5' end of the cDNA (common to even orthogonal techniques).
+
+This software aims to reduce the prevalence of artifactual TSSs by using Convolution Neural Networks (CNNs) to model 
+characteristics of spurious TSSs, and then comparing these characteristics to all TSSs.
+The CNN takes into consideration a few factors when assessing the validity of a TSS.
+First, in most 5' mapping technologies, there is an almost universal prevalence of the addition 
+of non-templated cytosines just adjacent to the TSS potentially due to the cap itself acting as a template for reverse transcription.
+Second, most organisms tend to have a sequence bias at TSSs, such as pyrimidine purine bias in humans and yeast.
+Finally, most TSSs tend to cluster into Transcription Start Regions (TSRs), so sparse singeltons tend to be less common at true TSSs.
+
+The software uses a bam file as input, and should still include the bases that were softclipped adjacent to the TSS by the alignment software.
 
 ## Quick Start
 
@@ -114,4 +133,6 @@ Encode signal around TSS
 tss_obj <- encode_signal(tss_obj)
 ```
 
-
+.
+.
+.
