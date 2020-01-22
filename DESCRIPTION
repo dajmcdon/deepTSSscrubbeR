@@ -17,6 +17,7 @@ Collate:
     'deep_tss.R'
     'encode.R'
     'expand_ranges.R'
+    'export_data.R'
     'genomic_sequences.R'
     'mark_status.R'
     'softclip.R'

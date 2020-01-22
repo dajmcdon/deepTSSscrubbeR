@@ -65,7 +65,7 @@ deep_tss <- function(bam) {
 		mutate_if(is.integer, as.double) %>%
 		mutate_if(is.factor, as.character) %>%
 		select(
-			seqnames, start, end, strand, qname,
+			seqnames, start, end, strand, qname, tss,
 			cigar.first, flag_firstinread, seq_firstinread
 		) %>%
 		add_count(seqnames, strand, start, name = "score")

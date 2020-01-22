@@ -15,10 +15,10 @@ assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deep
 tss_obj <- deep_tss(bam) %>%
 	softclipped %>%
 	mark_status(lower = 2, upper = 5) %>%
-	split_data(train_split = 1000, test_split = 1000) %>%
+	split_data(train_split = 2000, test_split = 2000) %>%
 	expand_ranges(sequence_expansion = 10, signal_expansion = 10) %>%
 	get_sequences(assembly_fasta) %>%
-	get_signal %>%
+	get_signal
 
 tss_encoded <- tss_obj %>%
 	encode_genomic %>%
@@ -32,6 +32,7 @@ deep_model <- tss_encoded %>%
 	tss_evaluate %>%
 	tss_predict
 
+export_bedgraphs(deep_model)
 ```
 
 ## Detailed
