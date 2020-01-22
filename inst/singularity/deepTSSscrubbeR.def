@@ -33,4 +33,9 @@ conda clean -y --all
 
 ## Add software to environment
 
-export PATH=/opt/conda/envs/deepTSSscrubbeR/bin:$PATH 
+export PATH=/opt/conda/envs/deepTSSscrubbeR/bin:$PATH
+
+%labels
+
+Version 0.1.0
+Name deepTSSscrubbeR
