@@ -23,7 +23,7 @@ setClass(
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
 #' @import tibble
 #' @importFrom purrr pluck
-#' @importFrom dplyr mutate left_join mutate_if
+#' @importFrom dplyr mutate left_join mutate_if select
 #' @importFrom GenomicAlignments readGAlignmentPairs
 #'
 #' @param bam Bam file from five-prime mapping data
@@ -59,10 +59,16 @@ deep_tss <- function(bam) {
 			"start" = ifelse(flag_firstinread == "99", start.first, end.first),
 			"end" = start,
 			"strand" = strand.first,
-			"seqnames" = seqnames.first
+			"seqnames" = seqnames.first,
+			"tss" = start
 		) %>%
 		mutate_if(is.integer, as.double) %>%
-		mutate_if(is.factor, as.character)
+		mutate_if(is.factor, as.character) %>%
+		select(
+			seqnames, start, end, strand, qname,
+			cigar.first, flag_firstinread, seq_firstinread
+		) %>%
+		add_count(seqnames, strand, start, name = "score")
 
 	deep_tss_object <- new("deep_tss", experiment = combined)
 	return(deep_tss_object)

@@ -37,7 +37,7 @@ softclipped <- function(deep_obj) {
 		replace_na(list(fiveprime_soft = 0)) %>%
 		mutate("soft_bases" = ifelse(fiveprime_soft == 0, NA, str_sub(seq_firstinread, end = fiveprime_soft))) %>%
 		add_count(seqnames, strand, start, name = "score") %>%
-		select(-seq_firstinread)
+		select(-seq_firstinread, -fiveprime_cigar)
 	
 	deep_obj@experiment <- soft
 	return(deep_obj)

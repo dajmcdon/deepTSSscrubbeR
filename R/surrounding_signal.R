@@ -4,8 +4,8 @@
 #' Get TSS signal around selected TSS
 #'
 #' @import tibble
-#' @importFrom dplyr select contains count group_by ungroup rename left_join
-#' @importFrom tidyr complete pivot_wider
+#' @importFrom dplyr select contains count rename left_join bind_rows vars mutate_at
+#' @importFrom tidyr pivot_wider replace_na
 #' @importFrom GenomicRanges GRanges makeGRangesFromDataFrame
 #' @importFrom IRanges findOverlapPairs
 #' @importFrom purrr map map2
@@ -35,21 +35,19 @@ get_signal <- function(deep_obj) {
 	)
 
 	signal_length <- (deep_obj@settings$signal_expansion * 2) + 1
+	dummy <- tibble(first.X.qname = "__dummy__", position = seq(0, signal_length - 1, 1))
 
 	positions <- map(overlaps,
 		~ count(.,
 			first.X.qname, first.X.seqnames, first.X.start,
 			first.X.end, first.X.strand, position
 		) %>%
-		group_by(
-			first.X.qname, first.X.seqnames, first.X.start,
-			first.X.end, first.X.strand
-		) %>%
-		complete(position = seq(0, signal_length - 1, 1), fill = list(n = 0)) %>%
-		ungroup %>%
-		select(first.X.qname, position, n) %>%
+		bind_rows(dummy, .) %>%
+		pivot_wider(names_from = position, values_from = n) %>%
 		rename("qname" = first.X.qname) %>%
-		pivot_wider(names_from = position, values_from = n)
+		select(qname, matches("^\\d+$")) %>%
+		mutate_at(vars(-qname), ~ replace_na(., 0)) %>%
+		filter(qname != "__dummy__")
 	)
 
 	overlap <- map2(deep_obj@ranges$signal, positions,
