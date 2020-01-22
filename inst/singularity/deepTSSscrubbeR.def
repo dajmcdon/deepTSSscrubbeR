@@ -1,0 +1,36 @@
+
+bootstrap: docker
+From: continuumio/miniconda3
+
+%post
+
+## Add conda to path.
+
+export PATH=$PATH:/opt/conda/bin
+
+## Update conda.
+
+conda update -n base -y -c defaults conda
+
+## Install required software.
+
+conda create -n deepTSSscrubbeR -y -c conda-forge -c bioconda \
+r-tidyverse r-devtools r-caret \
+r-keras r-tensorflow r-reticulate tensorflow \
+bioconductor-chipseeker bioconductor-genomicranges \
+bioconductor-genomicalignments bioconductor-rsamtools \
+bioconductor-rtracklayer bioconductor-biostrings
+
+## Update environment.
+
+conda update -n deepTSSscrubbeR -y -c conda-forge -c bioconda --all
+
+## Clean up extra files.
+
+conda clean -y --all
+
+%environment
+
+## Add software to environment
+
+export PATH=/opt/conda/envs/deepTSSscrubbeR/bin:$PATH 
