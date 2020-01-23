@@ -28,6 +28,11 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 	# Softclipped input.
 	soft_input <- layer_input(shape = c(3, 6, 1), name = "softinput")
 
+	# DNA shape input.
+	shape_length <- deep_obj@encoded$shape$train %>%
+		dim %>% .[3]
+	shape_input <- layer_input(shape = c(1, shape_length, 1), name = "shapeinput")
+
 	## Specify input layers.
 	
 	# Genomic sequence layer.
@@ -54,11 +59,20 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 		layer_dropout(0.25) %>%
 		layer_flatten()
 
+	# DNA shape layer.
+	shape_layer <- shape_input %>%
+		layer_conv_2d(filter = 32, kernel_size = c(1, 3), activation = "relu") %>%
+		layer_dropout(0.25) %>%
+		layer_conv_2d(filter = 64, kernel_size = c(1, 5), activation = "relu") %>%
+		layer_dropout(0.25) %>%
+		layer_flatten()
+
 	## Concatenate input layers.
 	concatenated_inputs <- layer_concatenate(list(
 		genomic_layer,
 		soft_layer,
-		signal_layer
+		signal_layer,
+		shape_layer
 	))
 
 	## Answer layer.
@@ -71,7 +85,7 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 
 	## Final model.
 	model <- keras_model(
-		list(genomic_input, soft_input, signal_input),
+		list(genomic_input, soft_input, signal_input, shape_input),
 		answer
 	)
 
@@ -106,7 +120,8 @@ tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split 
 			list(
 				genomicinput = deep_obj@encoded$genomic$train,
 				softinput = deep_obj@encoded$softclipped$train,
-				signalinput = deep_obj@encoded$signal$train
+				signalinput = deep_obj@encoded$signal$train,
+				shapeinput = deep_obj@encoded$shape$train
 			),
 			deep_obj@encoded$status$train,
 			epochs = epochs,
@@ -137,7 +152,8 @@ tss_evaluate <- function(deep_obj) {
 			list(
 				genomicinput = deep_obj@encoded$genomic$test,
 				softinput = deep_obj@encoded$softclipped$test,
-				signalinput = deep_obj@encoded$signal$test
+				signalinput = deep_obj@encoded$signal$test,
+				shapeinput = deep_obj@encoded$shape$test
 			),
 			deep_obj@encoded$status$test
 		)
@@ -165,7 +181,8 @@ tss_predict <- function(deep_obj) {
 		predict(list(
 			genomicinput = deep_obj@encoded$genomic$all,
 			softinput = deep_obj@encoded$softclipped$all,
-			signalinput = deep_obj@encoded$signal$all
+			signalinput = deep_obj@encoded$signal$all,
+			shapeinput = deep_obj@encoded$shape$all
 		))
 
 	predictions <- deep_obj@ranges$sequence$all
