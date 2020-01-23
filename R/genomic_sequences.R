@@ -18,16 +18,27 @@
 get_sequences <- function(deep_obj, assembly) {
         genome <- FaFile(assembly)
 
-        seqs <- deep_obj@ranges$sequence %>%
+        genomic_seqs <- deep_obj@ranges$sequence %>%
                 map(
                         ~ getSeq(genome, .) %>%
                         as.character %>%
                         set_names(NULL)
                 )
 
-	deep_obj@ranges$sequence$train$seqs <- seqs$train
-	deep_obj@ranges$sequence$test$seqs <- seqs$test
-	deep_obj@ranges$sequence$all$seqs <- seqs$all
+	deep_obj@ranges$sequence$train$seqs <- genomic_seqs$train
+	deep_obj@ranges$sequence$test$seqs <- genomic_seqs$test
+	deep_obj@ranges$sequence$all$seqs <- genomic_seqs$all
+
+	shape_seqs <- deep_obj@ranges$shape %>%
+		map(
+			~ getSeq(genome, .) %>%
+			as.character %>%
+			set_names(NULL)
+		)
+
+	deep_obj@ranges$shape$train$seqs <- shape_seqs$train
+	deep_obj@ranges$shape$test$seqs <- shape_seqs$test
+	deep_obj@ranges$shape$all$seqs <- shape_seqs$all
 
         return(deep_obj)
 }

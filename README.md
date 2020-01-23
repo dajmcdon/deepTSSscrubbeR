@@ -41,6 +41,7 @@ tss_obj <- deep_tss(bam) %>%
 
 tss_encoded <- tss_obj %>%
 	encode_genomic %>%
+	encode_shape %>%
 	encode_soft %>%
 	encode_signal %>%
 	encode_status
