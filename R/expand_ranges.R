@@ -11,6 +11,7 @@
 #' @param deep_obj deep_tss object
 #' @param sequence_expansion Number of bases to expand on each side for surrounding sequence analysis
 #' @param signal_expansion Number of bases to expand on each side for surrounding signal analysis
+#' @param shape_expansion Number of bases to expand on each side for surrounding DNA shape analysis
 #'
 #' @return Expanded GRanges objects
 #'
@@ -19,7 +20,8 @@
 expand_ranges <- function(
 	deep_obj,
 	sequence_expansion = 10,
-	signal_expansion = 10
+	signal_expansion = 10,
+	shape_expansion = 10
 ) {
 
 	sequence_expanded <- deep_obj@ranges$original %>%
@@ -28,11 +30,16 @@ expand_ranges <- function(
 	signal_expanded <- deep_obj@ranges$original %>%
 		expand_range(signal_expansion)
 
+	shape_expanded <- deep_obj@ranges$original %>%
+		expand_range(shape_expansion)
+
 	deep_obj@ranges$sequence <- sequence_expanded
 	deep_obj@ranges$signal <- signal_expanded
+	deep_obj@ranges$shape <- shape_expanded
 
 	deep_obj@settings$sequence_expansion <- sequence_expansion
 	deep_obj@settings$signal_expansion <- signal_expansion
+	deep_obj@settings$shape_expansion <- shape_expansion
 
 	return(deep_obj)
 }

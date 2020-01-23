@@ -6,7 +6,7 @@ From: continuumio/miniconda3
 
 ## Add conda to path.
 
-export PATH=$PATH:/opt/conda/bin
+echo ". /opt/conda/etc/profile.d/conda.sh" >> $SINGULARITY_ENVIRONMENT
 
 ## Update conda.
 
@@ -29,11 +29,7 @@ conda update -n deepTSSscrubbeR -y -c conda-forge -c bioconda --all
 
 conda clean -y --all
 
-%environment
-
-## Add software to environment
-
-export PATH=/opt/conda/envs/deepTSSscrubbeR/bin:$PATH
+echo "conda activate deepTSSscrubbeR" >> $SINGULARITY_ENVIRONMENT
 
 %labels
 

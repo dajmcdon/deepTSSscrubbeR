@@ -34,8 +34,8 @@ assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deep
 tss_obj <- deep_tss(bam) %>%
 	softclipped %>%
 	mark_status(lower = 2, upper = 5) %>%
-	split_data(train_split = 2000, test_split = 2000) %>%
-	expand_ranges(sequence_expansion = 10, signal_expansion = 10) %>%
+	split_data(train_split = 1000, test_split = 1000) %>%
+	expand_ranges %>%
 	get_sequences(assembly_fasta) %>%
 	get_signal
 
@@ -92,7 +92,11 @@ tss_obj <- split_data(tss_obj, train_split = 1000, test_split = 1000)
 Expand ranges for downstream analysis
 
 ```
-tss_obj <- expand_ranges(tss_obj, sequence_expansion = 10, signal_expansion = 10)
+tss_obj <- expand_ranges(tss_obj,
+	sequence_expansion = 10,
+	signal_expansion = 10,
+	shape_expansion = 10
+)
 ```
 
 Get genomic sequences for ranges

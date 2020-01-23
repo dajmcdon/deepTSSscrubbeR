@@ -13,11 +13,11 @@
 #' @importFrom tidyr replace_na
 #' @importFrom purrr map2_chr
 #'
-#' @rdname softclipped-function
+#' @rdname get_softclip-function
 #'
 #' @export
 
-softclipped <- function(deep_obj) {
+get_softclip <- function(deep_obj) {
 	
 	neg_strand <- deep_obj@experiment %>%
 		pull(strand) %>%
