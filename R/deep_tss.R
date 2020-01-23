@@ -68,7 +68,8 @@ deep_tss <- function(bam) {
 			seqnames, start, end, strand, qname, tss,
 			cigar.first, flag_firstinread, seq_firstinread
 		) %>%
-		add_count(seqnames, strand, start, name = "score")
+		add_count(seqnames, strand, tss, name = "score") %>%
+		rowid_to_column
 
 	deep_tss_object <- new("deep_tss", experiment = combined)
 	return(deep_tss_object)

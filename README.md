@@ -32,8 +32,8 @@ bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
 
 tss_obj <- deep_tss(bam) %>%
-	softclipped %>%
-	mark_status(lower = 2, upper = 5) %>%
+	get_softclip %>%
+	mark_status(lower = 2, upper = 10) %>%
 	split_data(train_split = 1000, test_split = 1000) %>%
 	expand_ranges %>%
 	get_sequences(assembly_fasta) %>%
@@ -74,7 +74,7 @@ tss_obj <- deep_tss(bam)
 Analyze 5' ends for soft clipped bases
 
 ```
-tss_obj <- softclipped(tss_obj)
+tss_obj <- get_softclip(tss_obj)
 ```
 
 Mark likely spurious TSSs based on number of reads

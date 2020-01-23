@@ -15,6 +15,7 @@ RoxygenNote: 6.1.1
 Collate: 
     'deep_model.R'
     'deep_tss.R'
+    'dna_shape.R'
     'encode.R'
     'expand_ranges.R'
     'export_data.R'

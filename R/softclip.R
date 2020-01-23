@@ -8,7 +8,7 @@
 #' @param deep_obj deep_tss object
 #'
 #' @import tibble
-#' @importFrom dplyr pull mutate case_when mutate_if select add_count
+#' @importFrom dplyr pull mutate case_when mutate_if select add_count group_by group_indices ungroup
 #' @importFrom stringr str_extract_all str_match str_sub
 #' @importFrom tidyr replace_na
 #' @importFrom purrr map2_chr
@@ -37,7 +37,10 @@ get_softclip <- function(deep_obj) {
 		replace_na(list(fiveprime_soft = 0)) %>%
 		mutate("soft_bases" = ifelse(fiveprime_soft == 0, NA, str_sub(seq_firstinread, end = fiveprime_soft))) %>%
 		add_count(seqnames, strand, start, name = "score") %>%
-		select(-seq_firstinread, -fiveprime_cigar)
+		select(-seq_firstinread, -fiveprime_cigar) %>%
+		group_by(seqnames, start, end, strand, soft_bases) %>%
+		mutate(tss_group = group_indices()) %>%
+		ungroup
 	
 	deep_obj@experiment <- soft
 	return(deep_obj)
