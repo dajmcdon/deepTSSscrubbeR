@@ -23,7 +23,7 @@ setClass(
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
 #' @import tibble
 #' @importFrom purrr pluck
-#' @importFrom dplyr mutate left_join mutate_if select
+#' @importFrom dplyr mutate left_join mutate_if select group_by ungroup group_indices
 #' @importFrom GenomicAlignments readGAlignmentPairs
 #'
 #' @param bam Bam file from five-prime mapping data
@@ -69,7 +69,9 @@ deep_tss <- function(bam) {
 			cigar.first, flag_firstinread, seq_firstinread
 		) %>%
 		add_count(seqnames, strand, tss, name = "score") %>%
-		rowid_to_column
+		group_by(seqnames, tss, strand) %>%
+		mutate(tss_group = group_indices()) %>%
+		ungroup
 
 	deep_tss_object <- new("deep_tss", experiment = combined)
 	return(deep_tss_object)

@@ -36,7 +36,7 @@ split_data <- function(deep_obj, train_split, test_split) {
 
 	## Mark TSSs for testing.
 	test_samples <- select_TSSs %>%
-		filter(!rowid %in% pull(train_samples, rowid)) %>%
+		filter(!tss_group %in% pull(train_samples, tss_group)) %>%
 		group_by(status) %>%
 		sample_n(test_size) %>%
 		ungroup %>%
