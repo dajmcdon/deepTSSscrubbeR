@@ -31,7 +31,6 @@ It is recommended to create a conda environment to run the software.
 ```
 library("reticulate")
 use_condaenv("keras")
-library("magrittr")
 
 bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
@@ -61,6 +60,8 @@ export_bedgraphs(deep_model)
 ```
 
 ## Detailed
+
+**WORK IN PROGRESS**
 
 Read in the TSSs
 

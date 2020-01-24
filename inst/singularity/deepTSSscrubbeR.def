@@ -6,7 +6,7 @@ From: continuumio/miniconda3
 
 ## Add conda to path.
 
-echo ". /opt/conda/etc/profile.d/conda.sh" >> $SINGULARITY_ENVIRONMENT
+. /opt/conda/etc/profile.d/conda.sh
 
 ## Update conda.
 
@@ -19,17 +19,14 @@ r-tidyverse r-devtools r-caret \
 r-keras r-tensorflow r-reticulate tensorflow \
 bioconductor-chipseeker bioconductor-genomicranges \
 bioconductor-genomicalignments bioconductor-rsamtools \
-bioconductor-rtracklayer bioconductor-biostrings
+bioconductor-rtracklayer bioconductor-biostrings \
+bioconductor-dnashaper
 
 ## Update environment.
-
-conda update -n deepTSSscrubbeR -y -c conda-forge -c bioconda --all
 
 ## Clean up extra files.
 
 conda clean -y --all
-
-echo "conda activate deepTSSscrubbeR" >> $SINGULARITY_ENVIRONMENT
 
 %labels
 
