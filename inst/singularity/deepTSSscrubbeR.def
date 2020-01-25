@@ -32,11 +32,9 @@ conda clean -y --all
 
 ## Create an alias to activate the conda environment.
 
-echo "alias activate_env=\". /opt/conda/etc/profile.d/conda.sh; conda activate deepTSSscrubbeR\"" >> $SINGULARITY_ENVIRONMENT
-
 %environment
 
-alias activate_env=\". /opt/conda/etc/profile.d/conda.sh; conda activate keras\"
+alias activate_env=". /opt/conda/etc/profile.d/conda.sh; conda activate keras"
 
 %labels
 
