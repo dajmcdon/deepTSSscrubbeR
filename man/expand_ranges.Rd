@@ -4,8 +4,12 @@
 \alias{expand_ranges}
 \title{Expand Ranges}
 \usage{
-expand_ranges(deep_obj, sequence_expansion = 10, signal_expansion = 10,
-  shape_expansion = 10)
+expand_ranges(
+  deep_obj,
+  sequence_expansion = 10,
+  signal_expansion = 10,
+  shape_expansion = 10
+)
 }
 \arguments{
 \item{deep_obj}{deep_tss object}

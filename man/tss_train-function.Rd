@@ -4,8 +4,7 @@
 \alias{tss_train}
 \title{Train TSS Model}
 \usage{
-tss_train(deep_obj, epochs = 25, batch_size = 150,
-  validation_split = 0.25)
+tss_train(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25)
 }
 \arguments{
 \item{deep_obj}{tss_obj}

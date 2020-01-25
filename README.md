@@ -24,7 +24,12 @@ The software uses a bam file as input, and should still include the bases that w
 
 ## Instlaling Software
 
-It is recommended to create a conda environment to run the software.
+It is recommended to use the provided singularity container with all required software installed.
+Singularity are containers similar to docker containers that allow compatability and reproducibilty for software and workflows.
+You must first install the [singularity software](https://sylabs.io/guides/3.5/user-guide/quick_start.html#quick-installation-steps) 
+onto your machine to use containers.
+
+
 
 ## Quick Start
 

@@ -4,7 +4,7 @@ From: continuumio/miniconda3
 
 %post
 
-## Add conda to path.
+## Allow conda to run.
 
 . /opt/conda/etc/profile.d/conda.sh
 
@@ -14,8 +14,8 @@ conda update -n base -y -c defaults conda
 
 ## Install required software.
 
-conda create -n deepTSSscrubbeR -y -c conda-forge -c bioconda \
-r-tidyverse r-devtools r-caret \
+conda create -n keras -y -c conda-forge -c bioconda \
+r-tidyverse r-devtools r-caret r-uwot r-dbscan \
 r-keras r-tensorflow r-reticulate tensorflow \
 bioconductor-chipseeker bioconductor-genomicranges \
 bioconductor-genomicalignments bioconductor-rsamtools \
@@ -24,9 +24,19 @@ bioconductor-dnashaper
 
 ## Update environment.
 
+conda update -n keras -y -c conda-forge -c bioconda --all
+
 ## Clean up extra files.
 
 conda clean -y --all
+
+## Create an alias to activate the conda environment.
+
+echo "alias activate_env=\". /opt/conda/etc/profile.d/conda.sh; conda activate deepTSSscrubbeR\"" >> $SINGULARITY_ENVIRONMENT
+
+%environment
+
+alias activate_env=\". /opt/conda/etc/profile.d/conda.sh; conda activate keras\"
 
 %labels
 
