@@ -30,7 +30,7 @@ one_hot_seqs <- function(sequence) {
 #' One hot encode the genomic sequences from the expanded ranges
 #'
 #' @import tibble
-#' @importFrom caret dummyVars
+#' @importFrom caret dummyVars contr.ltfr
 #' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
@@ -76,7 +76,8 @@ encode_genomic <- function(deep_obj) {
 #' One hot encode the soft-clipped sequences from the bam file
 #'
 #' @import tibble
-#' @import caret
+#' @importFrom caret dummyVars contr.ltfr
+#' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
 #' @importFrom stringr str_pad
