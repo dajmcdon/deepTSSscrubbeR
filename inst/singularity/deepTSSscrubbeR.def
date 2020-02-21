@@ -16,10 +16,9 @@ conda update -n base -y -c defaults conda
 
 conda create -n keras -y -c conda-forge -c bioconda \
 r-tidyverse r-devtools r-caret r-uwot r-dbscan \
-r-keras r-tensorflow r-reticulate tensorflow \
-bioconductor-chipseeker bioconductor-genomicranges \
-bioconductor-genomicalignments bioconductor-rsamtools \
-bioconductor-rtracklayer bioconductor-biostrings \
+r-keras r-tensorflow r-reticulate tensorflow keras \
+bioconductor-genomicranges bioconductor-genomicalignments \
+bioconductor-rsamtools bioconductor-rtracklayer bioconductor-biostrings \
 bioconductor-dnashaper
 
 ## Update environment.
@@ -30,11 +29,10 @@ conda update -n keras -y -c conda-forge -c bioconda --all
 
 conda clean -y --all
 
-## Create an alias to activate the conda environment.
+## Install deepTSSscrubbeR.
 
-%environment
-
-alias activate_env=". /opt/conda/etc/profile.d/conda.sh; conda activate keras"
+export PATH=/opt/conda/envs/keras/bin/:$PATH
+R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR')"
 
 %labels
 
