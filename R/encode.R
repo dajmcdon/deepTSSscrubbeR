@@ -3,7 +3,7 @@
 #'
 #' Internal function to one hot encode a sequence
 #'
-#' @import stats
+#' @importFrom stats model.matrix
 #' @importFrom stringr str_split
 #' @importFrom purrr map
 #' @importFrom reticulate array_reshape
@@ -30,7 +30,8 @@ one_hot_seqs <- function(sequence) {
 #' One hot encode the genomic sequences from the expanded ranges
 #'
 #' @import tibble
-#' @import caret
+#' @importFrom caret dummyVars
+#' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
 #' @importFrom dplyr mutate_all
@@ -112,14 +113,6 @@ encode_soft <- function(deep_obj) {
 
 	deep_obj@encoded$softclipped <- onehot
 	return(deep_obj)
-
-#	                select(soft_bases) %>%
-#               mutate(
-#                      soft_bases = replace_na(soft_bases, "U"),
-#                     soft_bases = str_pad(soft_bases, 3, "right", "U")
-#            ) %>%
-#           separate(soft_bases, 1:3, into = sprintf("P%s", 1:3)) %>%
-#          mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N", "U")))
 
 }
 

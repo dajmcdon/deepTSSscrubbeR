@@ -33,9 +33,22 @@ onto your machine to use containers.
 
 ## Quick Start
 
+Pull the singularity container, shell into it, activate the conda environment,
+then launch R.
+```
+singularity pull library://rpolicastro/default/deep_tss_scrubber:0.2.0
+singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber:0.2.0
+
+. /opt/conda/etc/profile.d/conda.sh
+conda activate keras; R
+```
+You can now start using the deepTSSscrubbeR library.
+
 ```
 library("reticulate")
 use_condaenv("keras")
+library("deepTSSscrubbeR")
+library("magrittr")
 
 bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
