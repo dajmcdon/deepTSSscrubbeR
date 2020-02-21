@@ -3,6 +3,7 @@
 #'
 #' Internal function to one hot encode a sequence
 #'
+#' @import stats
 #' @importFrom stringr str_split
 #' @importFrom purrr map
 #' @importFrom reticulate array_reshape
@@ -159,6 +160,8 @@ encode_status <- function(deep_obj) {
 #' @importFrom GenomicRanges GRanges
 #' @importFrom dplyr select matches mutate_all
 #' @importFrom reticulate array_reshape
+#'
+#' @param deep_obj deep tss object
 #'
 #' @rdname encode_signal-function
 #'

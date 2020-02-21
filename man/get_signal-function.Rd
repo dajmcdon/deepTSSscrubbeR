@@ -6,6 +6,9 @@
 \usage{
 get_signal(deep_obj)
 }
+\arguments{
+\item{deep_obj}{deep tss object}
+}
 \description{
 Get TSS signal around selected TSS
 }

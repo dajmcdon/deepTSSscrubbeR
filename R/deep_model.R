@@ -37,33 +37,33 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 	
 	# Genomic sequence layer.
 	genomic_layer <- genomic_input %>%
-		layer_conv_2d(filter = 32, kernel_size = c(3, 2), activation = "relu") %>%
+		layer_conv_2d(filters = 32, kernel_size = c(3, 2), activation = "relu") %>%
 		layer_dropout(0.25) %>%
-		layer_conv_2d(filter = 64, kernel_size = c(3, 2), activation = "relu", padding = "same") %>%
+		layer_conv_2d(filters = 64, kernel_size = c(3, 2), activation = "relu", padding = "same") %>%
 		layer_dropout(0.25) %>%
 		layer_flatten()
 
 	# Softclipped base layer.
 	soft_layer <- soft_input %>%
-		layer_conv_2d(filter = 32, kernel_size = c(1, 2), activation = "relu") %>%
+		layer_conv_2d(filters = 32, kernel_size = c(1, 2), activation = "relu") %>%
 		layer_dropout(0.25) %>%
-		layer_conv_2d(filter = 64, kernel_size = c(2, 2), activation = "relu") %>%
+		layer_conv_2d(filters = 64, kernel_size = c(2, 2), activation = "relu") %>%
 		layer_dropout(0.25) %>%
 		layer_flatten()
 
 	# Surrounding signal layer.
 	signal_layer <- signal_input %>%
-		layer_conv_2d(filter = 32, kernel_size = c(1, 2), activation = "relu") %>%
+		layer_conv_2d(filters = 32, kernel_size = c(1, 2), activation = "relu") %>%
 		layer_dropout(0.25) %>%
-		layer_conv_2d(filter = 64, kernel_size = c(1, 4), activation = "relu") %>%
+		layer_conv_2d(filters = 64, kernel_size = c(1, 4), activation = "relu") %>%
 		layer_dropout(0.25) %>%
 		layer_flatten()
 
 	# DNA shape layer.
 	shape_layer <- shape_input %>%
-		layer_conv_2d(filter = 32, kernel_size = c(1, 3), activation = "relu") %>%
+		layer_conv_2d(filters = 32, kernel_size = c(1, 3), activation = "relu") %>%
 		layer_dropout(0.25) %>%
-		layer_conv_2d(filter = 64, kernel_size = c(1, 5), activation = "relu") %>%
+		layer_conv_2d(filters = 64, kernel_size = c(1, 5), activation = "relu") %>%
 		layer_dropout(0.25) %>%
 		layer_flatten()
 
@@ -107,6 +107,9 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 #' @import keras
 #'
 #' @param deep_obj tss_obj
+#' @param epochs epochs
+#' @param batch_size batch size
+#' @param validation_split validation split
 #'
 #' @rdname tss_train-function
 #'

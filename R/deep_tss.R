@@ -20,6 +20,7 @@ setClass(
 
 #' deepTSSscrubbeR constructor function
 #'
+#' @import methods
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
 #' @import tibble
 #' @importFrom purrr pluck

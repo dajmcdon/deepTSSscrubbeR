@@ -10,6 +10,8 @@
 #' @importFrom IRanges findOverlapPairs
 #' @importFrom purrr map map2
 #'
+#' @param deep_obj deep tss object
+#'
 #' @rdname get_signal-function
 #'
 #' @export

@@ -4,10 +4,17 @@
 \alias{tss_train}
 \title{Train TSS Model}
 \usage{
-tss_train(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25)
+tss_train(deep_obj, epochs = 25, batch_size = 150,
+  validation_split = 0.25)
 }
 \arguments{
 \item{deep_obj}{tss_obj}
+
+\item{epochs}{epochs}
+
+\item{batch_size}{batch size}
+
+\item{validation_split}{validation split}
 }
 \description{
 Train the deepTSSscrubbeR model

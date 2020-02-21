@@ -6,6 +6,9 @@
 \usage{
 encode_signal(deep_obj)
 }
+\arguments{
+\item{deep_obj}{deep tss object}
+}
 \description{
 Encode signal around TSS
 }
