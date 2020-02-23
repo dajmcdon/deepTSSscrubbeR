@@ -13,6 +13,7 @@
 #' @rdname one_hot_encode-function
 #'
 #' @return one hot encoded sequence
+#' @export
 
 one_hot_seqs <- function(sequence) {
 	one_hot_seq <- sequence %>%
@@ -30,7 +31,7 @@ one_hot_seqs <- function(sequence) {
 #' One hot encode the genomic sequences from the expanded ranges
 #'
 #' @import tibble
-#' @importFrom caret dummyVars contr.ltfr
+#' @import caret
 #' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
@@ -76,7 +77,7 @@ encode_genomic <- function(deep_obj) {
 #' One hot encode the soft-clipped sequences from the bam file
 #'
 #' @import tibble
-#' @importFrom caret dummyVars contr.ltfr
+#' @import caret
 #' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
 #' @importFrom purrr pmap map
