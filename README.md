@@ -46,9 +46,11 @@ You can now start using the deepTSSscrubbeR library.
 
 ```
 library("reticulate")
-use_condaenv("keras")
+use_condaenv("keras", required = TRUE)
 library("deepTSSscrubbeR")
 library("magrittr")
+## 'dummyVars' seems to be broken unless you load the caret library
+library("caret")
 
 bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
