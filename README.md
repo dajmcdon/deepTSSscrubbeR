@@ -63,6 +63,8 @@ tss_obj <- deep_tss(bam) %>%
 	get_sequences(assembly_fasta) %>%
 	get_signal
 
+export_raw(tss_obj, "sequence_data.tsv", "signal_data.tsv")
+
 tss_encoded <- tss_obj %>%
 	encode_genomic %>%
 	encode_shape %>%

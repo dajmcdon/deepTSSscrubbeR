@@ -54,3 +54,54 @@ export_bedgraphs <- function(deep_obj, n_reads = 1, cutoff = 0.9) {
 	export(probs_pos, "probs_pos.bedgraph")
 	export(probs_neg, "probs_neg.bedgraph")
 }
+
+#' Export Raw.
+#'
+#' Export the raw values that eventially get encoded.
+#'
+#' @importFrom stringr str_c
+#'
+#' @param deep_obj tss_obj
+#'
+#' @rdname export_raw-function
+#' @export
+
+export_raw <- function(deep_obj, sequence_file, signal_file) {
+	
+	## Pull out the sequences surrounding the TSS and soft-clipped bases.
+	tss_sequences <- deep_obj@ranges$sequence$all %>%
+		as_tibble(.name_repair = "unique") %>%
+		select(qname, seqnames, start, end, strand, tss, score, soft_bases, seqs) %>%
+		rename(tss_position_score = score, surrounding_seqs = seqs) %>%
+		mutate(start = tss, end = tss) %>%
+		select(-tss)
+
+	## Pull out the sequences surrounding the TSSs that will be used as input for DNAShapeR.
+	tss_shape_sequences <- deep_obj@ranges$shape$all %>%
+		as_tibble(.name_repair = "unique") %>%
+		select(qname, seqs) %>%
+		rename(shape_seqs = seqs)
+
+	## merge sequence based data.
+	merged_sequences <- left_join(tss_sequences, tss_shape_sequences, by = "qname")
+
+	## Pull out the signal surrounding the TSS.
+	signal_indices <- deep_obj@settings$signal_expansion
+	signal_indices <- str_c("X", as.character(seq(0, signal_indices * 2, 1)))
+
+	surrounding_signal <- deep_obj@ranges$signal$all %>%
+		as_tibble(.name_repair = "unique") %>%
+		select(qname, all_of(signal_indices))
+
+	## Export sequence data.
+	write.table(
+		merged_sequences, sequence_file, sep = "\t",
+		col.names = TRUE, row.names = FALSE, quote = FALSE
+	)
+
+	# Export signal data.
+	write.table(
+		surrounding_signal, signal_file, sep = "\t",
+		col.names = TRUE, row.names = FALSE, quote = FALSE
+	)
+}
