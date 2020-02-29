@@ -55,7 +55,7 @@ export_bedgraphs <- function(deep_obj, n_reads = 1, cutoff = 0.9) {
 	export(probs_neg, "probs_neg.bedgraph")
 }
 
-#' Export Raw.
+#' Export Raw
 #'
 #' Export the raw values that eventially get encoded.
 #'
@@ -104,4 +104,33 @@ export_raw <- function(deep_obj, sequence_file, signal_file) {
 		surrounding_signal, signal_file, sep = "\t",
 		col.names = TRUE, row.names = FALSE, quote = FALSE
 	)
+}
+
+#' Export Encoded
+#'
+#' Export encoded data
+#'
+#' @importFrom reticulate import
+#'
+#' @param deep_obj tss_obj
+#'
+#' @rdname export_encoded-function
+#' @export
+
+export_encoded <- function(deep_obj) {
+	
+	## Import numpy.
+	np <- import("numpy")
+
+	## Export encoded genomic data.
+	np$save("genomic.npy", deep_obj@encoded$genomic$all)
+
+	## Export shape data.
+	np$save("shape.npy", deep_obj@encoded$shape$all)
+
+	## Export softclipped data.
+	np$save("softclipped.npy", deep_obj@encoded$softclipped$all)
+
+	## Export signal data.
+	np$save("signal.npy", deep_obj@encoded$signal$all)
 }

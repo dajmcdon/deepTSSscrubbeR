@@ -32,7 +32,7 @@ conda clean -y --all
 ## Install deepTSSscrubbeR.
 
 export PATH=/opt/conda/envs/keras/bin/:$PATH
-R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR')"
+R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR',ref='dev')"
 
 %labels
 
