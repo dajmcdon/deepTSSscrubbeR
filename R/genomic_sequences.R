@@ -6,7 +6,7 @@
 #' @importFrom GenomicRanges GRanges
 #' @importFrom Rsamtools FaFile
 #' @importFrom Biostrings getSeq
-#' @importFrom purrr set_names map map2
+#' @importFrom purrr set_names
 #'
 #' @param deep_obj dep_tss object
 #' @param assembly Path to genome assembly
@@ -16,29 +16,24 @@
 #' @export
 
 get_sequences <- function(deep_obj, assembly) {
-        genome <- FaFile(assembly)
+        
+	## Load the genome assembly.
+	genome <- FaFile(assembly)
 
+	## Retrieve the sequences used for genomic encoding.
         genomic_seqs <- deep_obj@ranges$sequence %>%
-                map(
-                        ~ getSeq(genome, .) %>%
-                        as.character %>%
-                        set_names(NULL)
-                )
+		getSeq(genome, .) %>%
+		as.character %>%
+		set_names(NULL)
+	deep_obj@ranges$sequence$genomic_seq <- genomic_seqs
 
-	deep_obj@ranges$sequence$train$seqs <- genomic_seqs$train
-	deep_obj@ranges$sequence$test$seqs <- genomic_seqs$test
-	deep_obj@ranges$sequence$all$seqs <- genomic_seqs$all
-
+	## Retrieve the sequences used for shape encoding.
 	shape_seqs <- deep_obj@ranges$shape %>%
-		map(
-			~ getSeq(genome, .) %>%
-			as.character %>%
-			set_names(NULL)
-		)
+		getSeq(genome, .) %>%
+		as.character %>%
+		set_names(NULL)
+	deep_obj@ranges$shape$shape_seq <- shape_seqs
 
-	deep_obj@ranges$shape$train$seqs <- shape_seqs$train
-	deep_obj@ranges$shape$test$seqs <- shape_seqs$test
-	deep_obj@ranges$shape$all$seqs <- shape_seqs$all
-
+	## Return the deep tss object.
         return(deep_obj)
 }

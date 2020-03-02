@@ -85,6 +85,14 @@ export_raw <- function(deep_obj, sequence_file, signal_file) {
 	## merge sequence based data.
 	merged_sequences <- left_join(tss_sequences, tss_shape_sequences, by = "qname")
 
+	## Mark status.
+	merged_sequences <- merged_sequences %>%
+		mutate(status = case_when(
+			tss_position_score >= deep_obj@settings$upper ~ 1,
+			tss_position_score <= deep_obj@settings$lower ~ 0,
+			TRUE ~ 2
+		))
+
 	## Pull out the signal surrounding the TSS.
 	signal_indices <- deep_obj@settings$signal_expansion
 	signal_indices <- str_c("X", as.character(seq(0, signal_indices * 2, 1)))

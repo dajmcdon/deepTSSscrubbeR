@@ -17,47 +17,58 @@
 #' @export
 
 get_signal <- function(deep_obj) {
-	overlaps <- map(deep_obj@ranges$signal,
-		~ findOverlapPairs(., deep_obj@ranges$original$all) %>%
-		as.data.frame %>%
-		as_tibble(.name_repair = "unique") %>%
-		select(
-			first.X.qname,
-			first.X.seqnames,
-			first.X.start, second.X.start,
-			first.X.end,
-			first.X.strand
-		) %>%
-		mutate("position" = ifelse(
+
+	## Grab all TSS positions and scores.
+	all_ranges <- as.data.table(deep_obj@experiment)
+	all_ranges <- all_ranges[, .(seqnames, start, end, strand, score)]
+	all_ranges <- unique(all_ranges)
+	all_ranges <- makeGRangesFromDataFrame(all_ranges, keep.extra.columns = TRUE)
+
+	## Find surrounding TSSs.
+	overlaps <- deep_obj@ranges$signal %>%
+		findOverlapPairs(., all_ranges) %>%
+		as.data.table
+
+	overlaps <- overlaps[,
+		.(first.X.seqnames, first.X.start, second.X.start, first.X.tss,
+		second.X.score, first.X.end, first.X.strand)
+	]
+
+	overlaps[,
+		position := ifelse(
 			first.X.strand == "+",
 			second.X.start - first.X.start,
 			first.X.end - second.X.start
-		)) %>%
-		select(-second.X.start)
+		)
+	][,
+		second.X.start := NULL
+	]
+
+	setnames(
+		overlaps,
+		old = c(
+			"first.X.seqnames", "first.X.start", "first.X.end",
+			"first.X.strand", "second.X.score", "first.X.tss"
+		),
+		new = c("seqnames", "start", "end", "strand", "score", "tss")
 	)
 
+	## Create matrix of surrounding signal.
 	signal_length <- (deep_obj@settings$signal_expansion * 2) + 1
-	dummy <- tibble(first.X.qname = "__dummy__", position = seq(0, signal_length - 1, 1))
-
-	positions <- map(overlaps,
-		~ count(.,
-			first.X.qname, first.X.seqnames, first.X.start,
-			first.X.end, first.X.strand, position
-		) %>%
-		bind_rows(dummy, .) %>%
-		pivot_wider(names_from = position, values_from = n) %>%
-		rename("qname" = first.X.qname) %>%
-		select(qname, matches("^\\d+$")) %>%
-		mutate_at(vars(-qname), ~ replace_na(., 0)) %>%
-		filter(qname != "__dummy__")
+	dummy <- data.table(
+		seqnames = "__dummy__",
+		position = seq(0, signal_length - 1, 1)
 	)
+	positions <- bind_rows(dummy, overlaps)
 
-	overlap <- map2(deep_obj@ranges$signal, positions,
-		~ as_tibble(.x, .name_repair = "unique") %>%
-			left_join(.y, by = "qname") %>%
-			makeGRangesFromDataFrame(keep.extra.columns = TRUE)
-	)
+	positions <- dcast(
+		overlaps, seqnames + start + end + strand + tss ~ position,
+		fill = 0, value.var = "score"
+	)[seqnames != "__dummy__"]
 
-	deep_obj@ranges$signal <- overlap
+	positions <- makeGRangesFromDataFrame(positions, keep.extra.columns = TRUE)
+
+	## Return surorunding signal.
+	deep_obj@ranges$signal <- positions
 	return(deep_obj)
 }

@@ -3,7 +3,7 @@
 #'
 #' Mark status as spurious based on read threshold
 #'
-#' @importFrom dplyr mutate case_when
+#' @importFrom dplyr case_when
 #'
 #' @param deep_obj deep_tss object
 #' @param lower Reads less than or equal to 'lower' will be marked as spurious
@@ -14,12 +14,16 @@
 #' @export
 
 mark_status <- function(deep_obj, lower = 2, upper = 5) {
-	status_marked <- deep_obj@experiment %>%
-		mutate("status" = case_when(
-			score <= lower ~ 0,
-			score >= upper ~ 1
-		))
 
-	deep_obj@experiment <- status_marked
+	status_marked <- as.data.table(deep_obj@experiment)
+	status_marked[, status := case_when(
+		score <= lower ~ 0,
+		score >= upper ~ 1
+	)]
+
+	deep_obj@settings$lower <- lower
+	deep_obj@settings$upper <- upper
+
+	deep_obj@experiment <- as.data.frame(status_marked)
 	return(deep_obj)
 }

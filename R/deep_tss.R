@@ -22,9 +22,8 @@ setClass(
 #'
 #' @import methods
 #' @importFrom Rsamtools scanBam scanBamWhat scanBamFlag ScanBamParam
-#' @import tibble
+#' @import data.table
 #' @importFrom purrr pluck
-#' @importFrom dplyr mutate left_join mutate_if select group_by ungroup group_indices
 #' @importFrom GenomicAlignments readGAlignmentPairs
 #'
 #' @param bam Bam file from five-prime mapping data
@@ -36,7 +35,8 @@ deep_tss <- function(bam) {
 	## Get bam pair info.
 	bampe <- readGAlignmentPairs(bam, use.names = TRUE) %>%
 		as.data.frame %>%
-		as_tibble(rownames = "qname")
+		as.data.table(keep.rownames = "qname")
+	setkey(bampe, qname)
 
 	## Get bam first in read seq.
 	params <- ScanBamParam(
@@ -48,31 +48,30 @@ deep_tss <- function(bam) {
 	bamseq <- scanBam(bam, param = params)[[1]]
 	bamseq$seq <- as.character(bamseq$seq)
 
-	bamseq <- tibble(
+	bamseq <- data.table(
 		qname = pluck(bamseq, "qname"),
 		flag_firstinread = pluck(bamseq, "flag"),
-		seq_firstinread = pluck(bamseq, "seq")
+		seq_firstinread = pluck(bamseq, "seq"),
+		key = "qname"
 	)
 	
 	## Combine paired bam and bam seq info.
-	combined <- left_join(bampe, bamseq, by = "qname") %>%
-		mutate(
-			"start" = ifelse(flag_firstinread == "99", start.first, end.first),
-			"end" = start,
-			"strand" = strand.first,
-			"seqnames" = seqnames.first,
-			"tss" = start
-		) %>%
-		mutate_if(is.integer, as.double) %>%
-		mutate_if(is.factor, as.character) %>%
-		select(
-			seqnames, start, end, strand, qname, tss,
-			cigar.first, flag_firstinread, seq_firstinread
-		) %>%
-		add_count(seqnames, strand, tss, name = "score") %>%
-		group_by(seqnames, tss, strand) %>%
-		mutate(tss_group = group_indices()) %>%
-		ungroup
+	combined <- merge(bampe, bamseq)
+
+	combined <- combined[,
+		.(start = ifelse(flag_firstinread == "99", start.first, end.first),
+		strand = strand.first, seqnames = seqnames.first,
+		cigar.first, flag_firstinread, seq_firstinread, qname)
+	]
+
+	combined[,
+		c("end", "tss") := start
+	][,
+		c("score", "tss_group") := list(.N, .GRP),
+		by = .(seqnames, start, end, strand)
+	][,
+		rowid := seq_len(.N)
+	]
 
 	deep_tss_object <- new("deep_tss", experiment = combined)
 	return(deep_tss_object)

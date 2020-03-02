@@ -3,10 +3,7 @@
 #'
 #' Expand TSS GRanges for downstream analysis
 #'
-#' @importFrom magrittr %>%
 #' @importFrom GenomicRanges GRanges
-#' @importFrom dplyr filter
-#' @importFrom purrr map
 #'
 #' @param deep_obj deep_tss object
 #' @param sequence_expansion Number of bases to expand on each side for surrounding sequence analysis
@@ -24,14 +21,47 @@ expand_ranges <- function(
 	shape_expansion = 10
 ) {
 
-	sequence_expanded <- deep_obj@ranges$original %>%
-		expand_range(sequence_expansion)
+	## Pull out data.
+	original_ranges <- as.data.table(deep_obj@experiment)[,
+		.(seqnames, start, end, strand, tss)
+	]
+	original_ranges <- unique(original_ranges)
 
-	signal_expanded <- deep_obj@ranges$original %>%
-		expand_range(signal_expansion)
+	## Expand sequence ranges.
+	sequence_expanded <- copy(original_ranges)
+	sequence_expanded[,
+		c("start", "end") := list(
+			start - sequence_expansion,
+			end + sequence_expansion
+		)
+	]
+	sequence_expanded <- makeGRangesFromDataFrame(
+		sequence_expanded, keep.extra.columns = TRUE
+	)
 
-	shape_expanded <- deep_obj@ranges$original %>%
-		expand_range(shape_expansion)
+	## Expand surrounding signal ranges.
+	signal_expanded <- copy(original_ranges)
+	signal_expanded[,
+		c("start", "end") := list(
+			start - signal_expansion,
+			end + signal_expansion
+		)
+	]
+	signal_expanded <- makeGRangesFromDataFrame(
+		signal_expanded, keep.extra.columns = TRUE
+	)
+
+	## Expand ranges to get DA shape.
+	shape_expanded <- copy(original_ranges)
+	shape_expanded[,
+		c("start", "end") := list(
+			start - shape_expansion,
+			end + shape_expansion
+		)
+	]
+	shape_expanded <- makeGRangesFromDataFrame(
+		shape_expanded, keep.extra.columns = TRUE
+	)
 
 	deep_obj@ranges$sequence <- sequence_expanded
 	deep_obj@ranges$signal <- signal_expanded
@@ -42,30 +72,4 @@ expand_ranges <- function(
 	deep_obj@settings$shape_expansion <- shape_expansion
 
 	return(deep_obj)
-}
-
-#' Expand Ranges Function
-#'
-#' Backend function to expand granges
-#'
-#' @importFrom magrittr %>%
-#' @importFrom GenomicRanges GRanges strand resize sort width score
-#' @importFrom purrr map
-#'
-#' @param grange GRange object to expand
-#' @param expand_size Size to expand ranges on each side of TSS
-#'
-#' @return Expanded GRanges object
-
-expand_range <- function(grange, expand_size) {
-
-	new_ranges <- map(grange, function(x) {
-		tss_ranges <- x %>%
-                	resize(width = expand_size + 1, fix = "end") %>%
-                	resize(width = (expand_size * 2) + 1, fix = "start")
-
-		return(tss_ranges)
-	})
-
-        return(new_ranges)
 }
