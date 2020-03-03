@@ -25,6 +25,7 @@ setClass(
 #' @import data.table
 #' @importFrom purrr pluck
 #' @importFrom GenomicAlignments readGAlignmentPairs
+#' @importFrom GenomicRanges makeGRangesFromDataFrame GRanges
 #'
 #' @param bam Bam file from five-prime mapping data
 #'
@@ -64,15 +65,19 @@ deep_tss <- function(bam) {
 		cigar.first, flag_firstinread, seq_firstinread, qname)
 	]
 
+	combined[, c("end", "tss") := start]
+
+	combined <- makeGRangesFromDataFrame(combined, keep.extra.columns = TRUE)
+	combined <- sort(combined)
+	combined <- as.data.table(combined)
+
 	combined[,
-		c("end", "tss") := start
-	][,
 		c("score", "tss_group") := list(.N, .GRP),
 		by = .(seqnames, start, end, strand)
 	][,
 		rowid := seq_len(.N)
 	]
 
-	deep_tss_object <- new("deep_tss", experiment = combined)
+	deep_tss_object <- new("deep_tss", experiment = as.data.frame(combined))
 	return(deep_tss_object)
 }

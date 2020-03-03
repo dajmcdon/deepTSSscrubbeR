@@ -16,6 +16,7 @@
 
 get_softclip <- function(deep_obj) {
 
+	## Get soft-clipped bases.
 	soft <- as.data.table(deep_obj@experiment)
 
 	soft[, softclipped := ifelse(
@@ -31,7 +32,19 @@ get_softclip <- function(deep_obj) {
 	][,
 		c("softclipped", "seq_firstinread") := NULL
 	]
+
+	soft_unique <- soft[, .(seqnames, start, end, strand, soft_bases)]
+	soft_unique <- unique(soft_unique)
+	soft_unique[, soft_index := seq_len(.N)]
 	
+	## Add soft-clipped index back to original data.
+	soft <- merge(soft, soft_unique, on = c("seqnames", "start", "end", "strand", "soft_bases"))
+	soft[, soft_bases := NULL]
 	deep_obj@experiment <- as.data.frame(soft)
+
+	## Add soft-clipped ranges to deep tss object.
+	soft_unique <- makeGRangesFromDataFrame(soft_unique, keep.extra.columns = TRUE)
+	deep_obj@ranges$soft <- soft_unique
+
 	return(deep_obj)
 }

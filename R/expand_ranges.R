@@ -35,6 +35,8 @@ expand_ranges <- function(
 			end + sequence_expansion
 		)
 	]
+	sequence_expanded[, sequence_index := seq_len(.N)]
+
 	sequence_expanded <- makeGRangesFromDataFrame(
 		sequence_expanded, keep.extra.columns = TRUE
 	)
@@ -47,6 +49,8 @@ expand_ranges <- function(
 			end + signal_expansion
 		)
 	]
+	signal_expanded[, signal_index := seq_len(.N)]
+
 	signal_expanded <- makeGRangesFromDataFrame(
 		signal_expanded, keep.extra.columns = TRUE
 	)
@@ -59,10 +63,13 @@ expand_ranges <- function(
 			end + shape_expansion
 		)
 	]
+	shape_expanded[, shape_index := seq_len(.N)]
+
 	shape_expanded <- makeGRangesFromDataFrame(
 		shape_expanded, keep.extra.columns = TRUE
 	)
 
+	## Add expanded ranges back to deep tss object.
 	deep_obj@ranges$sequence <- sequence_expanded
 	deep_obj@ranges$signal <- signal_expanded
 	deep_obj@ranges$shape <- shape_expanded

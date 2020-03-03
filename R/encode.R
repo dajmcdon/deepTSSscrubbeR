@@ -1,5 +1,5 @@
 
-#' One Hot Encode a Sequence
+#' One Hot Encode a Sequence (Deprecated)
 #'
 #' Internal function to one hot encode a sequence
 #'
@@ -34,10 +34,7 @@ one_hot_seqs <- function(sequence) {
 #' @import caret
 #' @importFrom stats predict
 #' @importFrom GenomicRanges GRanges
-#' @importFrom purrr pmap map
-#' @importFrom dplyr mutate_all
-#' @importFrom stringr str_pad
-#' @importFrom tidyr separate
+#' @importFrom stringr str_pad str_split
 #' @importFrom reticulate array_reshape
 #'
 #' @param deep_obj deep_tss object
@@ -51,22 +48,16 @@ one_hot_seqs <- function(sequence) {
 encode_genomic <- function(deep_obj) {
 	sequence_length <- (deep_obj@settings$sequence_expansion * 2) + 1
 
-	encoded_sequences <- map(
-		deep_obj@ranges$sequence,
-		~ as_tibble(., .name_repair = "unique") %>%
-			select(seqs) %>%
-			separate(seqs, 1:sequence_length, into = sprintf("P%s", 1:sequence_length)) %>%
-			mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N")))
-	)
+	encoded_sequences <- as.data.table(deep_obj@ranges$sequence)
+	encoded_sequences <- encoded_sequences[, str_split(genomic_seq, "", simplify = TRUE)]
+	encoded_sequences <- as.data.table(encoded_sequences)
+	encoded_sequences <- encoded_sequences[, lapply(.SD, factor, levels = c("A", "T", "G", "C", "N"))]
 
-	onehot <- map(
-		encoded_sequences,
-		~ dummyVars(' ~ .', data = .x) %>%
-			predict(newdata = .x) %>%
-			as_tibble(.name_repair = "unique") %>%
-			as.matrix %>%
-			array_reshape(dim = c(nrow(.), sequence_length, 5, 1))
-	)
+	onehot <- encoded_sequences %>%
+		dummyVars(' ~ .', data = .) %>%
+		predict(newdata = encoded_sequences) %>%
+		as.matrix %>%
+		array_reshape(dim = c(nrow(.), sequence_length, 5, 1))
 
 	deep_obj@encoded$genomic <- onehot
 	return(deep_obj)
@@ -79,10 +70,9 @@ encode_genomic <- function(deep_obj) {
 #' @import tibble
 #' @import caret
 #' @importFrom stats predict
-#' @importFrom GenomicRanges GRanges
-#' @importFrom purrr pmap map
-#' @importFrom stringr str_pad
+#' @importFrom stringr str_pad str_split
 #' @importFrom reticulate array_reshape
+#' @importFrom tidyr replace_na
 #'
 #' @param deep_obj object
 #'
@@ -91,29 +81,26 @@ encode_genomic <- function(deep_obj) {
 #' @export
 
 encode_soft <- function(deep_obj) {
-	encoded_soft <- map(
-		deep_obj@ranges$sequence,
-		~ as_tibble(., .name_repair = "unique") %>%
-			select(soft_bases) %>%
-			mutate(
-				soft_bases = replace_na(soft_bases, "U"),
-				soft_bases = str_pad(soft_bases, 3, "right", "U")
-			) %>%
-			separate(soft_bases, 1:3, into = sprintf("P%s", 1:3)) %>%
-			mutate_all(~ factor(., levels = c("A", "T", "G", "C", "N", "U")))
-	)
+	
+	encoded_soft <- as.data.table(deep_obj@ranges$soft)
 
-	onehot <- map(
-                encoded_soft,
-                ~ dummyVars(' ~ .', data = .x) %>%
-                        predict(newdata = .x) %>%
-                        as_tibble(.name_repair = "unique") %>%
-                        as.matrix %>%
-                        array_reshape(dim = c(nrow(.), 3, 6, 1))
-        )
+	encoded_soft[,
+		soft_bases := replace_na(soft_bases, "U")
+	][,
+		soft_bases := str_pad(soft_bases, 3, "right", "U")
+	]
 
+	encoded_soft <- encoded_soft[, str_split(soft_bases, "", simplify = TRUE)]
+	encoded_soft <- as.data.table(encoded_soft)
+	encoded_soft <- encoded_soft[, lapply(.SD, factor, levels = c("A", "T", "G", "C", "N", "U"))]
 
-	deep_obj@encoded$softclipped <- onehot
+	onehot <- encoded_soft %>%
+		dummyVars(' ~ .', data = .) %>%
+		predict(newdata = encoded_soft) %>%
+		as.matrix %>%
+		array_reshape(dim = c(nrow(.), 3, 6, 1))
+
+	deep_obj@encoded$soft <- onehot
 	return(deep_obj)
 
 }
@@ -163,14 +150,21 @@ encode_status <- function(deep_obj) {
 #' @export
 
 encode_signal <- function(deep_obj) {
-	signal <- map(
-		deep_obj@ranges$signal,
-		~ as_tibble(., .name_repair = "unique") %>%
-		select(matches("X\\d+$")) %>%
-		mutate_all(~ ifelse(. > 0, 1, 0)) %>%
-		as.matrix %>%
-		array_reshape(dim = c(nrow(.), 1, ncol(.), 1))
-	)
+
+	## Prepare surrounding signal matrix.
+	signal <- as.data.table(deep_obj@ranges$signal)
+	signal[, c(
+			"seqnames", "start", "end", "strand",
+			"tss", "signal_index", "width"
+		) := NULL
+	]
+
+	## Convert to binary representation of signal.
+	signal <- as.matrix(signal)
+	signal <- (signal >= 1) * 1
+	
+	## Convert to array and save to deep tss object.
+	signal <- array_reshape(signal, dim = c(nrow(signal), 1, ncol(signal), 1))
 
 	deep_obj@encoded$signal <- signal
 	return(deep_obj)

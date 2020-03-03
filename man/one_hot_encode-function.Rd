@@ -2,7 +2,7 @@
 % Please edit documentation in R/encode.R
 \name{one_hot_seqs}
 \alias{one_hot_seqs}
-\title{One Hot Encode a Sequence}
+\title{One Hot Encode a Sequence (Deprecated)}
 \usage{
 one_hot_seqs(sequence)
 }
