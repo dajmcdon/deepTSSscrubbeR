@@ -36,8 +36,8 @@ onto your machine to use containers.
 Pull the singularity container, shell into it, activate the conda environment,
 then launch R.
 ```
-singularity pull library://rpolicastro/default/deep_tss_scrubber:0.5.0
-singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.5.0.sif
+singularity pull library://rpolicastro/default/deep_tss_scrubber:0.5
+singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.5.sif
 
 . /opt/conda/etc/profile.d/conda.sh
 conda activate keras; R
