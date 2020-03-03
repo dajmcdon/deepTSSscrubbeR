@@ -109,9 +109,8 @@ encode_soft <- function(deep_obj) {
 #'
 #' Encode the 'true' status of the TSSs
 #'
-#' @import tibble
-#' @importFrom GenomicRanges GRanges
 #' @importFrom magrittr %>% extract
+#' @importFrom scales rescale
 #' @importFrom reticulate array_reshape
 #' @importFrom purrr map
 #'
@@ -122,15 +121,38 @@ encode_soft <- function(deep_obj) {
 #' @export
 
 encode_status <- function(deep_obj) {
-	status <- deep_obj@ranges$sequence %>%
-		extract(c("train", "test")) %>%
-		map(
-			~ as_tibble(., .name_repair = "unique") %>%
-			pull(status) %>%
-			array_reshape(length(.))
-		)	
 
-	deep_obj@encoded$status <- status
+	## Grab training and test data.
+	status <- as.data.table(deep_obj@experiment)[index %in% c("train", "test")] %>%
+		split(.$index)
+
+	status <- map(status, function(x) {
+		x <- x[,
+			.(index, status, score, log2_score = log2(score),
+			soft_index, sequence_index, shape_index, signal_index)
+		]
+		return(x)
+	})
+
+	## Encode status.
+	status_encoded <- map(status, function(x) {
+		x <- x[, status]
+		x <- array_reshape(x, dim = length(x))
+		return(x)
+	})
+
+	## Encode score.
+	score_encoded <- map(status, function(x) {
+		x <- x[, log2_score]
+		x <- array_reshape(x, dim = length(x))
+		return(x)
+	})
+
+	## Add back to deep tss object.
+	deep_obj@status_indices <- map(status, as.data.frame)
+	deep_obj@encoded$status <- status_encoded
+	deep_obj@encoded$score <- score_encoded
+
 	return(deep_obj)
 }
 
@@ -138,9 +160,6 @@ encode_status <- function(deep_obj) {
 #'
 #' Encode signal around TSS
 #'
-#' @import tibble
-#' @importFrom GenomicRanges GRanges
-#' @importFrom dplyr select matches mutate_all
 #' @importFrom reticulate array_reshape
 #'
 #' @param deep_obj deep tss object

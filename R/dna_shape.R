@@ -38,6 +38,6 @@ encode_shape <- function(
 		encodeSeqShape("temp.fa", ., featureNames = paste0("1-", shape_features)) %>%
 		array_reshape(dim = c(nrow(.), 1, ncol(.), 1))
 
-	deep_obj@encoded$shape <- shape_parameters
+	deep_obj@encoded$shape <- shape
 	return(deep_obj)
 }

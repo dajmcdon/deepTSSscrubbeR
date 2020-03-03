@@ -29,8 +29,7 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 	soft_input <- layer_input(shape = c(3, 6, 1), name = "softinput")
 
 	# DNA shape input.
-	shape_length <- deep_obj@encoded$shape$train %>%
-		dim %>% .[3]
+	shape_length <- dim(deep_obj@encoded$shape)[3]
 	shape_input <- layer_input(shape = c(1, shape_length, 1), name = "shapeinput")
 
 	## Specify input layers.
@@ -117,14 +116,32 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 
 tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25) {
 	
+	## Get the training data.
+	indices <- as.data.table(deep_obj@status_indices$train)
+
+	sequence_index <- indices[, sequence_index]
+	sequence_input <- deep_obj@encoded$genomic[sequence_index, , , , drop = FALSE]
+
+	soft_index <- indices[, soft_index]
+	soft_input <- deep_obj@encoded$soft[soft_index, , , , drop = FALSE]
+	
+	signal_index <- indices[, signal_index]
+	signal_input <- deep_obj@encoded$signal[signal_index, , , , drop = FALSE]
+
+	shape_index <- indices[, shape_index]
+	shape_input <- deep_obj@encoded$shape[shape_index, , , , drop = FALSE]
+
+	## Pull out the previously generated model.
 	deep_model <- deep_obj@model$model
+	
+	## Train model.
 	history <- deep_model %>%
 		fit(
 			list(
-				genomicinput = deep_obj@encoded$genomic$train,
-				softinput = deep_obj@encoded$softclipped$train,
-				signalinput = deep_obj@encoded$signal$train,
-				shapeinput = deep_obj@encoded$shape$train
+				genomicinput = sequence_input,
+				softinput = soft_input,
+				signalinput = signal_input,
+				shapeinput = shape_input
 			),
 			deep_obj@encoded$status$train,
 			epochs = epochs,
@@ -132,8 +149,10 @@ tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split 
 			validation_split = validation_split
 		)
 
+	## Add trained model to deep tss object.
 	deep_obj@model$train_history <- history
 	deep_obj@model$trained_model <- deep_model
+
 	return(deep_obj)
 }
 

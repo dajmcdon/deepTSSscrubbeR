@@ -6,7 +6,8 @@ setClass(
 		ranges = "list",
 		encoded = "list",
 		model = "list",
-		results = "list"
+		results = "list",
+		status_indices = "list"
 	),
 	prototype(
 		experiment = data.frame(),
@@ -14,7 +15,8 @@ setClass(
 		ranges = list(),
 		encoded = list(),
 		model = list(),
-		results = list()
+		results = list(),
+		status_indices = list()
 	)
 )
 
