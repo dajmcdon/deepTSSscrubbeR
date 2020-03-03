@@ -15,7 +15,7 @@ conda update -n base -y -c defaults conda
 ## Install required software.
 
 conda create -n keras -y -c conda-forge -c bioconda \
-r-tidyverse r-devtools r-caret r-uwot r-dbscan \
+r-base r-tidyverse r-devtools r-caret r-uwot r-dbscan \
 r-keras tensorflow keras \
 bioconductor-genomicranges bioconductor-genomicalignments \
 bioconductor-rsamtools bioconductor-rtracklayer bioconductor-biostrings \
