@@ -36,5 +36,5 @@ R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/
 
 %labels
 
-Version 0.1.0
+Version 0.5.0
 Name deepTSSscrubbeR
