@@ -15,7 +15,8 @@ conda update -n base -y -c defaults conda
 ## Install required software.
 
 conda create -n keras -y -c conda-forge -c bioconda \
-r-tidyverse r-devtools r-caret r-uwot r-dbscan r-reticulate \
+r-tidyverse r-devtools r-caret r-uwot r-dbscan \
+r-keras tensorflow keras \
 bioconductor-genomicranges bioconductor-genomicalignments \
 bioconductor-rsamtools bioconductor-rtracklayer bioconductor-biostrings \
 bioconductor-dnashaper
@@ -28,14 +29,9 @@ conda update -n keras -y -c conda-forge -c bioconda --all
 
 conda clean -y --all
 
-## Install Keras.
-export PATH=/opt/conda/envs/keras/bin/:$PATH
-
-R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rstudio/keras')"
-R --slave -e "Sys.setenv(TAR='/bin/tar'); library('keras');install_keras()"
-
 ## Install deepTSSscrubbeR.
 
+export PATH=/opt/conda/envs/keras/bin/:$PATH
 R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR',ref='v0.5')"
 
 %labels
