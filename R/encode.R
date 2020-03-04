@@ -129,7 +129,7 @@ encode_status <- function(deep_obj) {
 	status <- map(status, function(x) {
 		x <- x[,
 			.(index, status, score, log2_score = log2(score),
-			soft_index, sequence_index, shape_index, signal_index)
+			tss_group, soft_group)
 		]
 		return(x)
 	})
@@ -174,7 +174,7 @@ encode_signal <- function(deep_obj) {
 	signal <- as.data.table(deep_obj@ranges$signal)
 	signal[, c(
 			"seqnames", "start", "end", "strand",
-			"tss", "signal_index", "width"
+			"tss", "tss_group", "width"
 		) := NULL
 	]
 

@@ -37,9 +37,9 @@ tss_model <- function(deep_obj, optimizer = "adam", metric = "accuracy") {
 	# Genomic sequence layer.
 	genomic_layer <- genomic_input %>%
 		layer_conv_2d(filters = 32, kernel_size = c(3, 2), activation = "relu") %>%
-		layer_dropout(0.25) %>%
+		layer_dropout(0.5) %>%
 		layer_conv_2d(filters = 64, kernel_size = c(3, 2), activation = "relu", padding = "same") %>%
-		layer_dropout(0.25) %>%
+		layer_dropout(0.5) %>%
 		layer_flatten()
 
 	# Softclipped base layer.
@@ -118,18 +118,13 @@ tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split 
 	
 	## Get the training data.
 	indices <- as.data.table(deep_obj@status_indices$train)
+	tss_groups <- indices[, tss_group]
+	soft_groups <- indices[, soft_group]
 
-	sequence_index <- indices[, sequence_index]
-	sequence_input <- deep_obj@encoded$genomic[sequence_index, , , , drop = FALSE]
-
-	soft_index <- indices[, soft_index]
-	soft_input <- deep_obj@encoded$soft[soft_index, , , , drop = FALSE]
-	
-	signal_index <- indices[, signal_index]
-	signal_input <- deep_obj@encoded$signal[signal_index, , , , drop = FALSE]
-
-	shape_index <- indices[, shape_index]
-	shape_input <- deep_obj@encoded$shape[shape_index, , , , drop = FALSE]
+	sequence_input <- deep_obj@encoded$genomic[tss_groups, , , , drop = FALSE]
+	soft_input <- deep_obj@encoded$soft[soft_groups, , , , drop = FALSE]
+	signal_input <- deep_obj@encoded$signal[tss_groups, , , , drop = FALSE]
+	shape_input <- deep_obj@encoded$shape[tss_groups, , , , drop = FALSE]
 
 	## Pull out the previously generated model.
 	deep_model <- deep_obj@model$model
@@ -168,14 +163,27 @@ tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split 
 #'
 #' @export
 
+
+
 tss_evaluate <- function(deep_obj) {
+
+	## Get the test data.
+        indices <- as.data.table(deep_obj@status_indices$test)
+        tss_groups <- indices[, tss_group]
+        soft_groups <- indices[, soft_group]
+
+        sequence_input <- deep_obj@encoded$genomic[tss_groups, , , , drop = FALSE]
+        soft_input <- deep_obj@encoded$soft[soft_groups, , , , drop = FALSE]
+        signal_input <- deep_obj@encoded$signal[tss_groups, , , , drop = FALSE]
+        shape_input <- deep_obj@encoded$shape[tss_groups, , , , drop = FALSE]
+
 	accuracy_results <- deep_obj@model$trained_model %>%
 		evaluate(
 			list(
-				genomicinput = deep_obj@encoded$genomic$test,
-				softinput = deep_obj@encoded$softclipped$test,
-				signalinput = deep_obj@encoded$signal$test,
-				shapeinput = deep_obj@encoded$shape$test
+				genomicinput = sequence_input,
+				softinput = soft_input,
+				signalinput = signal_input,
+				shapeinput = shape_input
 			),
 			deep_obj@encoded$status$test
 		)

@@ -21,7 +21,7 @@ split_data <- function(deep_obj, train_split, test_split) {
 	train_size <- ceiling(train_split / 2)
 	test_size <- ceiling(test_split / 2)
 
-	## Select randomly one of same TSS with same softclip status.
+	## Select randomly one of same TSS.
 	select_TSSs <- as_tibble(deep_obj@experiment, name_repair = "unique") %>%
 		filter(!is.na(status)) %>%
 		group_by(tss_group) %>%
@@ -46,11 +46,12 @@ split_data <- function(deep_obj, train_split, test_split) {
 		as.data.table
 
 	## Add index back to data.
-	merged <- rbind(train_samples, test_samples)
-	merged <- merged[, .(rowid, index)]
+	merged <- rbind(train_samples, test_samples)[, .(rowid, index)]
 	setkey(merged, rowid)
+
 	original <- as.data.table(deep_obj@experiment, key = "rowid")
-	merged <- merge(original, merged, all.x = TRUE)
+
+	merged <- merge(original, merged, all.x = TRUE)[order(rowid)]
 
 	## Return data back to deep_tss object
 	deep_obj@experiment <- as.data.frame(merged)

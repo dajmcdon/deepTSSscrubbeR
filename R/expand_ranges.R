@@ -23,19 +23,19 @@ expand_ranges <- function(
 
 	## Pull out data.
 	original_ranges <- as.data.table(deep_obj@experiment)[,
-		.(seqnames, start, end, strand, tss)
+		.(seqnames, start, end, strand, tss, tss_group)
 	]
 	original_ranges <- unique(original_ranges)
 
 	## Expand sequence ranges.
 	sequence_expanded <- copy(original_ranges)
+
 	sequence_expanded[,
 		c("start", "end") := list(
 			start - sequence_expansion,
 			end + sequence_expansion
 		)
 	]
-	sequence_expanded[, sequence_index := seq_len(.N)]
 
 	sequence_expanded <- makeGRangesFromDataFrame(
 		sequence_expanded, keep.extra.columns = TRUE
@@ -49,13 +49,12 @@ expand_ranges <- function(
 			end + signal_expansion
 		)
 	]
-	signal_expanded[, signal_index := seq_len(.N)]
 
 	signal_expanded <- makeGRangesFromDataFrame(
 		signal_expanded, keep.extra.columns = TRUE
 	)
 
-	## Expand ranges to get DA shape.
+	## Expand ranges to get DNA shape.
 	shape_expanded <- copy(original_ranges)
 	shape_expanded[,
 		c("start", "end") := list(
@@ -63,7 +62,6 @@ expand_ranges <- function(
 			end + shape_expansion
 		)
 	]
-	shape_expanded[, shape_index := seq_len(.N)]
 
 	shape_expanded <- makeGRangesFromDataFrame(
 		shape_expanded, keep.extra.columns = TRUE

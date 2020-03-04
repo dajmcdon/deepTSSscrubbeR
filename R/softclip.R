@@ -31,14 +31,15 @@ get_softclip <- function(deep_obj) {
 		soft_bases := ifelse(softclipped == 0, NA, str_sub(seq_firstinread, end = softclipped))
 	][,
 		c("softclipped", "seq_firstinread") := NULL
+	][,
+		soft_group := .GRP,
+		by = .(seqnames, start, end, strand, soft_bases)
 	]
 
-	soft_unique <- soft[, .(seqnames, start, end, strand, soft_bases)]
+	soft_unique <- soft[, .(seqnames, start, end, strand, soft_bases, soft_group)]
 	soft_unique <- unique(soft_unique)
-	soft_unique[, soft_index := seq_len(.N)]
 	
 	## Add soft-clipped index back to original data.
-	soft <- merge(soft, soft_unique, on = c("seqnames", "start", "end", "strand", "soft_bases"))
 	soft[, soft_bases := NULL]
 	deep_obj@experiment <- as.data.frame(soft)
 

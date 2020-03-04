@@ -19,8 +19,9 @@
 get_signal <- function(deep_obj) {
 
 	## Grab all TSS positions and scores.
-	all_ranges <- as.data.table(deep_obj@experiment)
-	all_ranges <- all_ranges[, .(seqnames, start, end, strand, score)]
+	all_ranges <- as.data.table(deep_obj@experiment)[,
+		.(seqnames, start, end, strand, score)
+	]
 	all_ranges <- unique(all_ranges)
 	all_ranges <- makeGRangesFromDataFrame(all_ranges, keep.extra.columns = TRUE)
 
@@ -31,7 +32,7 @@ get_signal <- function(deep_obj) {
 
 	overlaps <- overlaps[,
 		.(first.X.seqnames, first.X.start, second.X.start, first.X.tss,
-		second.X.score, first.X.end, first.X.strand, first.signal_index)
+		second.X.score, first.X.end, first.X.strand, first.tss_group)
 	]
 
 	overlaps[,
@@ -49,9 +50,9 @@ get_signal <- function(deep_obj) {
 		old = c(
 			"first.X.seqnames", "first.X.start", "first.X.end",
 			"first.X.strand", "second.X.score", "first.X.tss",
-			"first.signal_index"
+			"first.tss_group"
 		),
-		new = c("seqnames", "start", "end", "strand", "score", "tss", "signal_index")
+		new = c("seqnames", "start", "end", "strand", "score", "tss", "tss_group")
 	)
 
 	## Create matrix of surrounding signal.
@@ -63,21 +64,17 @@ get_signal <- function(deep_obj) {
 	positions <- bind_rows(dummy, overlaps)
 
 	positions <- dcast(
-		overlaps, seqnames + start + end + strand + tss + signal_index ~ position,
+		overlaps, seqnames + start + end + strand + tss + tss_group ~ position,
 		fill = 0, value.var = "score"
 	)[
 		seqnames != "__dummy__"
+	][
+		order(tss_group)
 	]
-
-	## Merge into original data.
-	original_data <- as.data.table(deep_obj@experiment)
-	pos <- positions[, .(seqnames, tss, strand, signal_index)]
-	original_data <- merge(original_data, pos, on = c("seqnames", "tss", "strand"))
 
 	## Return surrounding signal to deep tss object.
 	positions <- makeGRangesFromDataFrame(positions, keep.extra.columns = TRUE)
 	deep_obj@ranges$signal <- positions
-	deep_obj@experiment <- as.data.frame(original_data)
 
 	return(deep_obj)
 }

@@ -74,7 +74,7 @@ export_encoded(tss_encoded)
 
 deep_model <- tss_encoded %>%
 	tss_model %>%
-	tss_train %>%
+	tss_train(epochs = 50) %>%
 	tss_evaluate %>%
 	tss_predict
 

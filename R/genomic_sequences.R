@@ -29,14 +29,6 @@ get_sequences <- function(deep_obj, assembly) {
 
 	genomic_ranges$genomic_seq <- genomic_seqs
 
-	## Merge genomic sequence index back into original data.
-	original_data <- as.data.table(deep_obj@experiment)
-	genomic <- as.data.table(genomic_ranges)[,
-		.(seqnames, tss, strand, sequence_index)
-	]
-
-	original_data <- merge(original_data, genomic, on = c("seqnames", "tss", "strand"))
-
 	## Retrieve the sequences used for shape encoding.
 	shape_ranges <- deep_obj@ranges$shape
 	shape_seqs <- genomic_ranges %>%
@@ -46,15 +38,7 @@ get_sequences <- function(deep_obj, assembly) {
 
 	shape_ranges$shape_seq <- shape_seqs
 
-	## Merge shape index back into original data.
-	shape <- as.data.table(shape_ranges)[,
-		.(seqnames, tss, strand, shape_index)
-	]
-
-	original_data <- merge(original_data, shape, on = c("seqnames", "tss", "strand"))
-
 	## Return the deep tss object.
-	deep_obj@experiment <- original_data
 	deep_obj@ranges$sequence <- genomic_ranges
 	deep_obj@ranges$shape <- shape_ranges
 
