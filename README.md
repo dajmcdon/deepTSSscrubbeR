@@ -36,17 +36,15 @@ onto your machine to use containers.
 Pull the singularity container, shell into it, activate the conda environment,
 then launch R.
 ```
-singularity pull library://rpolicastro/default/deep_tss_scrubber:0.5.0
-singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.5.0.sif
+singularity pull library://rpolicastro/default/deep_tss_scrubber:0.6.0
+singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.6.0.sif
 
 . /opt/conda/etc/profile.d/conda.sh
-conda activate keras; R
+conda activate r-reticulate; R
 ```
 You can now start using the deepTSSscrubbeR library.
 
 ```
-library("reticulate")
-use_condaenv("keras", required = TRUE)
 library("deepTSSscrubbeR")
 library("magrittr")
 ## 'dummyVars' seems to be broken unless you load the caret library
