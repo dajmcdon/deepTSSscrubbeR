@@ -9,50 +9,43 @@
 #' @importFrom rtracklayer export
 #'
 #' @param deep_obj tss_obj
-#' @param n_reads filter TSSs with less than this number of reads
-#' @param cutoff filter reads with less than this probability of being a real TSS
 #'
 #' @rdname export_bedgrpahs-function
 #'
 #' @export
 
-export_bedgraphs <- function(deep_obj, n_reads = 1, cutoff = 0.9) {
-	tss <- deep_obj@results$all %>%
-		as_tibble(.name_repair = "unique") %>%
-		mutate(start = tss, end = tss)
+export_bedgraphs <- function(deep_obj) {
 
-	unfiltered <- tss %>%
-		distinct(seqnames, start, end, strand, score) %>%
-		makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+	tss_all <- as.data.table(deep_obj@results$all)
+	tss_all[, c("start", "end") := tss]
+
+	if (deep_obj@settings$model_type == "score") {
+		tss_score <- tss_all[, .(seqnames, start, end, strand, predicted_log2_score)]
+		tss_score <- tss_score[,
+			.(score = 2^mean(predicted_log2_score)),
+			by = .(seqnames, start, end, strand)
+		]
+
+		tss_score <- makeGRangesFromDataFrame(tss_score, keep.extra.columns = TRUE)
+		
+		tss_score_pos <- tss_score[strand(tss_score) == "+"]
+		tss_score_neg <- tss_score[strand(tss_score) == "-"]
+
+		export(tss_score_pos, "predicted_score_pos.bedgraph")
+		export(tss_score_neg, "predicted_score_neg.bedgraph")
+	}
+
+
+	tss <- tss_all[, .(seqnames, start, end, strand, score)]
+	tss <- unique(tss)	
+	tss <- makeGRangesFromDataFrame(tss, keep.extra.columns = TRUE)
 	
-	filtered <- tss %>%
-		filter(score >= n_reads & probs >= cutoff) %>%
-		add_count(seqnames, start, end, strand, name = "score") %>%
-		makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+	pos <- tss[strand(tss) == "+"]
+	neg <- tss[strand(tss) == "-"]
 
-	probs <- tss %>%
-		group_by(seqnames, start, end, strand) %>%
-		summarize(score = mean(probs)) %>%
-		ungroup %>%
-		makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+	export(pos, "pos.bedgraph")
+	export(neg, "neg.bedgraph")
 
-	unfiltered_pos <- unfiltered[strand(unfiltered) == "+"]
-	unfiltered_neg <- unfiltered[strand(unfiltered) == "-"]
-
-	export(unfiltered_pos, "unfiltered_pos.bedgraph")
-	export(unfiltered_neg, "unfiltered_neg.bedgraph")
-
-	filtered_pos <- filtered[strand(filtered) == "+"]
-	filtered_neg <- filtered[strand(filtered) == "-"]
-
-	export(filtered_pos, "filtered_pos.bedgraph")
-	export(filtered_neg, "filtered_neg.bedgraph")
-
-	probs_pos <- probs[strand(probs) == "+"]
-	probs_neg <- probs[strand(probs) == "-"]
-
-	export(probs_pos, "probs_pos.bedgraph")
-	export(probs_neg, "probs_neg.bedgraph")
 }
 
 #' Export Raw

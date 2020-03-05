@@ -4,14 +4,23 @@
 \alias{tss_model}
 \title{Build TSS Model}
 \usage{
-tss_model(deep_obj, optimizer = "adam", metric = "accuracy")
+tss_model(
+  deep_obj,
+  model_type = "status",
+  optimizer = "adam",
+  metric = "default"
+)
 }
 \arguments{
-\item{deep_obj}{depp_tss object}
+\item{deep_obj}{deep_tss object}
+
+\item{model_type}{Whether to model 'status' or 'score'}
 
 \item{optimizer}{Optimizer for compiling model}
 
-\item{metric}{Metric to optimize model}
+\item{metric}{Metric to optimize model.
+Defaults are "accuracy" for classification, and "mean_absolute_error"
+for score regression}
 }
 \description{
 Build model of TSS Confidence

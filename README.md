@@ -72,9 +72,21 @@ tss_encoded <- tss_obj %>%
 
 export_encoded(tss_encoded)
 
+# Classifier
+
 deep_model <- tss_encoded %>%
 	tss_model %>%
-	tss_train(epochs = 50) %>%
+	tss_train(epochs = 30) %>%
+	tss_evaluate %>%
+	tss_predict
+
+export_bedgraphs(deep_model)
+
+# Regression
+
+deep_model <- tss_encoded %>%
+	tss_model(model_type = "score") %>%
+	tss_train(epochs = 30) %>%
 	tss_evaluate %>%
 	tss_predict
 

@@ -4,14 +4,10 @@
 \alias{export_bedgraphs}
 \title{Export TSS Bedgraphs}
 \usage{
-export_bedgraphs(deep_obj, n_reads = 1, cutoff = 0.9)
+export_bedgraphs(deep_obj)
 }
 \arguments{
 \item{deep_obj}{tss_obj}
-
-\item{n_reads}{filter TSSs with less than this number of reads}
-
-\item{cutoff}{filter reads with less than this probability of being a real TSS}
 }
 \description{
 Export bedgraphs
