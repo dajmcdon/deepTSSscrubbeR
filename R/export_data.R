@@ -33,8 +33,21 @@ export_bedgraphs <- function(deep_obj) {
 
 		export(tss_score_pos, "predicted_score_pos.bedgraph")
 		export(tss_score_neg, "predicted_score_neg.bedgraph")
-	}
+	} else {
+		tss_status <- tss_all[, .(seqnames, start, end, strand, status_prob)]
+		tss_status <- tss_status[,
+			.(score = mean(status_prob)),
+			by = .(seqnames, start, end, strand)
+		]
 
+		tss_status <- makeGRangesFromDataFrame(tss_status, keep.extra.columns = TRUE)
+
+		tss_status_pos <- tss_status[strand(tss_status) == "+"]
+		tss_status_neg <- tss_status[strand(tss_status) == "-"]
+
+		export(tss_status_pos, "predicted_status_pos.bedgraph")
+		export(tss_status_neg, "predicted_status_neg.bedgraph")
+	}
 
 	tss <- tss_all[, .(seqnames, start, end, strand, score)]
 	tss <- unique(tss)	

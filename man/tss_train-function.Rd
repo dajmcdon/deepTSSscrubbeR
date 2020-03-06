@@ -4,7 +4,14 @@
 \alias{tss_train}
 \title{Train TSS Model}
 \usage{
-tss_train(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25)
+tss_train(
+  deep_obj,
+  epochs = 25,
+  batch_size = 150,
+  validation_split = 0.25,
+  subset = NA,
+  weights = NA
+)
 }
 \arguments{
 \item{deep_obj}{tss_obj}
@@ -14,6 +21,10 @@ tss_train(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25)
 \item{batch_size}{batch size}
 
 \item{validation_split}{validation split}
+
+\item{subset}{Optional vector of read qnames to train on}
+
+\item{weights}{Weights as list to pass to fit function}
 }
 \description{
 Train the deepTSSscrubbeR model

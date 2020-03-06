@@ -138,17 +138,28 @@ tss_model <- function(deep_obj, model_type = "status", optimizer = "adam", metri
 #' @param epochs epochs
 #' @param batch_size batch size
 #' @param validation_split validation split
+#' @param subset Optional vector of read qnames to train on
+#' @param weights Weights as list to pass to fit function
 #'
 #' @rdname tss_train-function
 #'
 #' @export
 
-tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25) {
+tss_train <- function(
+		deep_obj, epochs = 25, batch_size = 150, validation_split = 0.25,
+		subset = NA, weights = NA
+) {
 	
 	## Get the training data.
-	indices <- as.data.table(deep_obj@status_indices$train)
-	tss_groups <- indices[, tss_group]
-	soft_groups <- indices[, soft_group]
+	if (!is.na(subset)) {
+		table_subset <- as.data.table(deep_obj@experiment)[qname %in% subset]
+		tss_groups <- table_subset[, tss_group]
+		soft_groups <- table_subset[, soft_group]
+	} else {
+		indices <- as.data.table(deep_obj@status_indices$train)
+		tss_groups <- indices[, tss_group]
+		soft_groups <- indices[, soft_group]
+	}
 
 	sequence_input <- deep_obj@encoded$genomic[tss_groups, , , , drop = FALSE]
 	soft_input <- deep_obj@encoded$soft[soft_groups, , , , drop = FALSE]
@@ -158,26 +169,62 @@ tss_train <- function(deep_obj, epochs = 25, batch_size = 150, validation_split 
 	## Pull out the previously generated model.
 	deep_model <- deep_obj@model$model
 	
-	## Train model.
-	if (deep_obj@settings$model_type == "status") {
-		original_values = deep_obj@encoded$status$train
+	## Get original scores or status.
+	if (!is.na(subset)) {
+
+		if (deep_obj@settings$model_type == "status") {
+			original_values <- table_subset[, status]
+			original_values <- array_reshape(original_values, dim = length(original_values))
+		} else {
+			original_values <- log2(table_subset[, score])
+			original_values <- array_reshape(original_values, dim = length(original_values))
+		}
+
 	} else {
-		original_values = deep_obj@encoded$score$train
+
+		if (deep_obj@settings$model_type == "status") {
+			original_values <- deep_obj@encoded$status$train
+		} else {
+			original_values <- deep_obj@encoded$score$train
+		}
+	
 	}
 
-	history <- deep_model %>%
-		fit(
-			list(
-				genomicinput = sequence_input,
-				softinput = soft_input,
-				signalinput = signal_input,
-				shapeinput = shape_input
-			),
-			original_values,
-			epochs = epochs,
-			batch_size = batch_size,
-			validation_split = validation_split
-		)
+	## Train model.
+	if (is.na(weights)) {
+
+		history <- deep_model %>%
+			fit(
+				list(
+					genomicinput = sequence_input,
+					softinput = soft_input,
+					signalinput = signal_input,
+					shapeinput = shape_input
+				),
+				original_values,
+				epochs = epochs,
+				batch_size = batch_size,
+				validation_split = validation_split
+			)
+
+	} else {
+
+		history <- deep_model %>%
+			fit(
+				list(
+					genomicinput = sequence_input,
+					softinput = soft_input,
+					signalinput = signal_input,
+					shapeinput = shape_input
+				),
+				original_values,
+				epochs = epochs,
+				batch_size = batch_size,
+				validation_split = validation_split,
+				class_weights = weights
+			)
+
+	}
 
 	## Add trained model to deep tss object.
 	deep_obj@model$train_history <- history
