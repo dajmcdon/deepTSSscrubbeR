@@ -36,8 +36,8 @@ onto your machine to use containers.
 Pull the singularity container, shell into it, activate the conda environment,
 then launch R.
 ```
-singularity pull library://rpolicastro/default/deep_tss_scrubber:0.6.0
-singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.6.0.sif
+singularity pull library://rpolicastro/default/deep_tss_scrubber:0.7.0
+singularity shell -eCB "$(pwd)" -H "$(pwd)" deep_tss_scrubber_0.7.0.sif
 
 . /opt/conda/etc/profile.d/conda.sh
 conda activate r-reticulate; R
@@ -52,11 +52,13 @@ library("caret")
 
 bam <- system.file("extdata", "S288C.bam", package = "deepTSSscrubbeR")
 assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deepTSSscrubbeR")
+annotation_gtf <- system.file("extdata", "yeast_annotation.gtf", package = "deepTSSscrubbeR")
 
 tss_obj <- deep_tss(bam) %>%
+	tss_annotate(annotation = annotation_gtf, upstream = 250, downstream = 100) %>%
 	get_softclip %>%
-	mark_status(lower = 2, upper = 10) %>%
-	split_data(train_split = 1000, test_split = 1000) %>%
+	mark_status(use_annotation = TRUE, upper = 10) %>%
+	split_data(train_split = 2500, test_split = 2500) %>%
 	expand_ranges %>%
 	get_sequences(assembly_fasta) %>%
 	get_signal
@@ -75,12 +77,13 @@ export_encoded(tss_encoded)
 # Classifier
 
 deep_model <- tss_encoded %>%
-	tss_model %>%
-	tss_train(epochs = 30) %>%
+	tss_model(metric = c("AUC", "accuracy")) %>%
+	tss_train(epochs = 5, batch_size = 250) %>%
 	tss_evaluate %>%
 	tss_predict
 
 export_bedgraphs(deep_model)
+export_report(deep_model)
 
 # Regression
 
@@ -91,6 +94,24 @@ deep_model <- tss_encoded %>%
 	tss_predict
 
 export_bedgraphs(deep_model)
+
+# Training on selected TSSs.
+
+qnames <- system.file("extdata", "stable_set.tsv", package = "deepTSSscrubbeR") %>%
+	read.delim(header = TRUE, stringsAsFactors = FALSE, sep = "\t")
+qnames <- qnames[, 1]
+
+deep_model <- tss_encoded %>%
+	tss_model(metric = c("AUC", "accuracy")) %>%
+	tss_train(
+		validation_split = 0.10,
+		epochs = 20,
+		batch_size = 10000,
+		subset = qnames,
+		weights = list("0" = 1, "1" = 101232 / 6931)
+	) %>%
+	tss_predict
+
 ```
 
 ## Detailed

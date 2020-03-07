@@ -4,7 +4,7 @@
 \alias{mark_status}
 \title{Mark Status}
 \usage{
-mark_status(deep_obj, lower = 2, upper = 5)
+mark_status(deep_obj, lower = 2, upper = 10, use_annotation = FALSE)
 }
 \arguments{
 \item{deep_obj}{deep_tss object}
@@ -12,6 +12,9 @@ mark_status(deep_obj, lower = 2, upper = 5)
 \item{lower}{Reads less than or equal to 'lower' will be marked as spurious}
 
 \item{upper}{Reads greater than or equal to 'upper' will be marked as good}
+
+\item{use_annotation}{If TRUE will ignore upper and lower bounds and instead
+pick a sample of TSSs within and outside of annotated promoters}
 }
 \value{
 GRanges object with status column indicating spurious (1) or not (0)

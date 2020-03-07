@@ -34,6 +34,7 @@ Imports:
     IRanges
 RoxygenNote: 7.0.2
 Collate: 
+    'annotate.R'
     'deep_model.R'
     'deep_tss.R'
     'dna_shape.R'

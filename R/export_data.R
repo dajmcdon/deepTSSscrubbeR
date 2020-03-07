@@ -148,3 +148,44 @@ export_encoded <- function(deep_obj) {
 	## Export signal data.
 	np$save("signal.npy", deep_obj@encoded$signal$all)
 }
+
+#' Export Report
+#'
+#' Export a table report for predictions.
+#'
+#' @param deep_obj deep tss object
+#'
+#' @rdname export_report-function
+#' @export
+
+export_report <- function(deep_obj) {
+	
+	## Pull out useful info.
+	results <- as.data.table(deep_obj@results$all)
+	results[, c("cigar.first", "flag_firstinread", "tss", "status", "index") := NULL]
+
+	## Merge soft-clipped base info.
+	soft <- as.data.table(deep_obj@ranges$soft)[, .(soft_group, soft_bases)]
+	setkey(soft, soft_group)
+	setkey(results, soft_group)
+	results <- merge(results, soft, all.x = TRUE)
+
+	## Merge sequence info.
+	sequences <- as.data.table(deep_obj@ranges$sequence)[, .(tss_group, genomic_seq)]
+	setkey(results, tss_group)
+	results <- merge(results, sequences, all.x = TRUE)
+
+	## Clean up results.
+	results <- results[,
+		.(seqnames, start, end, strand, width, score, gene_id,
+		transcript_id, tss_distance, annotation, simple_annotations,
+		rowid, soft_group, soft_bases, tss_group, genomic_seq, status_prob)
+	]
+	results <- distinct(results, soft_group, .keep_all = TRUE)
+
+	## Export the report table.
+	write.table(
+		results, "prediction_report.tsv", sep = "\t",
+		col.names = TRUE, row.names = FALSE, quote = FALSE
+	)		
+}
