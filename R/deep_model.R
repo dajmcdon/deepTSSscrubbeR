@@ -47,10 +47,10 @@ tss_model <- function(deep_obj, model_type = "status", optimizer = "adam", metri
 
 	# Softclipped base layer.
 	soft_layer <- soft_input %>%
-		layer_conv_2d(filters = 32, kernel_size = c(1, 2), activation = "relu") %>%
-		layer_dropout(0.25) %>%
-		layer_conv_2d(filters = 64, kernel_size = c(2, 2), activation = "relu") %>%
-		layer_dropout(0.25) %>%
+		layer_conv_2d(filters = 16, kernel_size = c(1, 2), activation = "relu") %>%
+		layer_dropout(0.5) %>%
+		layer_conv_2d(filters = 32, kernel_size = c(2, 2), activation = "relu") %>%
+		layer_dropout(0.5) %>%
 		layer_flatten()
 
 	# Surrounding signal layer.

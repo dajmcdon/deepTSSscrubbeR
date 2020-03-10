@@ -55,10 +55,10 @@ assembly_fasta <- system.file("extdata", "yeast_assembly.fasta", package = "deep
 annotation_gtf <- system.file("extdata", "yeast_annotation.gtf", package = "deepTSSscrubbeR")
 
 tss_obj <- deep_tss(bam) %>%
-	tss_annotate(annotation = annotation_gtf, upstream = 250, downstream = 100) %>%
+	tss_annotate(annotation = annotation_gtf, upstream = 250, downstream = 1) %>%
 	get_softclip %>%
-	mark_status(use_annotation = TRUE, upper = 10) %>%
-	split_data(train_split = 2500, test_split = 2500) %>%
+	mark_status(use_annotation = TRUE) %>%
+	split_data(train_split = 7500, test_split = 2500) %>%
 	expand_ranges %>%
 	get_sequences(assembly_fasta) %>%
 	get_signal
@@ -78,7 +78,7 @@ export_encoded(tss_encoded)
 
 deep_model <- tss_encoded %>%
 	tss_model(metric = c("AUC", "accuracy")) %>%
-	tss_train(epochs = 5, batch_size = 250) %>%
+	tss_train(epochs = 10, batch_size = 250) %>%
 	tss_evaluate %>%
 	tss_predict
 
@@ -89,7 +89,7 @@ export_report(deep_model)
 
 deep_model <- tss_encoded %>%
 	tss_model(model_type = "score") %>%
-	tss_train(epochs = 30) %>%
+	tss_train(epochs = 20) %>%
 	tss_evaluate %>%
 	tss_predict
 

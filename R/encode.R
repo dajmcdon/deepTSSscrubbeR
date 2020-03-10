@@ -179,12 +179,14 @@ encode_signal <- function(deep_obj) {
 	]
 
 	## Convert to binary representation of signal.
-	signal <- as.matrix(signal)
-	signal <- (signal >= 1) * 1
+	signal <- log2(as.matrix(signal) + 1)
+	signal_max <- max(signal)
+	signal[, deep_obj@settings$signal_expansion + 1] <- 0
 	
 	## Convert to array and save to deep tss object.
 	signal <- array_reshape(signal, dim = c(nrow(signal), 1, ncol(signal), 1))
 
+	deep_obj@settings$signal_max <- signal_max
 	deep_obj@encoded$signal <- signal
 	return(deep_obj)
 }

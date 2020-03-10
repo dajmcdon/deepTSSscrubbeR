@@ -30,7 +30,7 @@ mark_status <- function(deep_obj, lower = 2, upper = 10, use_annotation = FALSE)
 	} else {
 		status_marked <- as.data.table(deep_obj@experiment)
 		status_marked[, status := case_when(
-			simple_annotations == "exon" ~ 0,
+			simple_annotations == "exon" & score >= lower ~ 0,
 			simple_annotations == "promoter" & score >= upper ~ 1
 		)]
 		deep_obj@settings$use_annotation <- use_annotation
