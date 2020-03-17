@@ -36,7 +36,7 @@ R --slave -e "Sys.setenv(TAR='/bin/tar'); keras::install_keras(method = 'conda')
 
 ## Install deepTSSscrubbeR.
 
-R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR',ref='v0.5')"
+R --slave -e "Sys.setenv(TAR='/bin/tar'); devtools::install_github('rpolicastro/deepTSSscrubbeR')"
 
 %environment
 
