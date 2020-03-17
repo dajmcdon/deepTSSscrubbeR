@@ -63,7 +63,7 @@ tss_obj <- deep_tss(bam) %>%
 	get_sequences(assembly_fasta) %>%
 	get_signal
 
-#export_raw(tss_obj, "sequence_data.tsv", "signal_data.tsv")
+export_raw(tss_obj, "raw_data.tsv")
 
 tss_encoded <- tss_obj %>%
 	encode_genomic %>%
@@ -72,13 +72,13 @@ tss_encoded <- tss_obj %>%
 	encode_signal %>%
 	encode_status
 
-#export_encoded(tss_encoded)
+export_encoded(tss_encoded)
 
 # Classifier
 
 deep_model <- tss_encoded %>%
 	tss_model(metric = c("AUC", "accuracy")) %>%
-	tss_train(epochs = 10, batch_size = 250) %>%
+	tss_train(epochs = 5, batch_size = 250) %>%
 	tss_evaluate %>%
 	tss_predict
 

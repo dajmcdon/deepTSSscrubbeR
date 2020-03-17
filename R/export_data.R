@@ -68,55 +68,24 @@ export_bedgraphs <- function(deep_obj) {
 #' @importFrom stringr str_c
 #'
 #' @param deep_obj tss_obj
+#' @param raw_report Raw report directory and file name
 #'
 #' @rdname export_raw-function
 #' @export
 
-export_raw <- function(deep_obj, sequence_file, signal_file) {
+export_raw <- function(deep_obj, raw_report = "raw_report.tsv") {
 	
-	## Pull out the sequences surrounding the TSS and soft-clipped bases.
-	tss_sequences <- deep_obj@ranges$sequence$all %>%
-		as_tibble(.name_repair = "unique") %>%
-		select(qname, seqnames, start, end, strand, tss, score, soft_bases, seqs) %>%
-		rename(tss_position_score = score, surrounding_seqs = seqs) %>%
-		mutate(start = tss, end = tss) %>%
-		select(-tss)
-
-	## Pull out the sequences surrounding the TSSs that will be used as input for DNAShapeR.
-	tss_shape_sequences <- deep_obj@ranges$shape$all %>%
-		as_tibble(.name_repair = "unique") %>%
-		select(qname, seqs) %>%
-		rename(shape_seqs = seqs)
-
-	## merge sequence based data.
-	merged_sequences <- left_join(tss_sequences, tss_shape_sequences, by = "qname")
-
-	## Mark status.
-	merged_sequences <- merged_sequences %>%
-		mutate(status = case_when(
-			tss_position_score >= deep_obj@settings$upper ~ 1,
-			tss_position_score <= deep_obj@settings$lower ~ 0,
-			TRUE ~ 2
-		))
-
-	## Pull out the signal surrounding the TSS.
-	signal_indices <- deep_obj@settings$signal_expansion
-	signal_indices <- str_c("X", as.character(seq(0, signal_indices * 2, 1)))
-
-	surrounding_signal <- deep_obj@ranges$signal$all %>%
-		as_tibble(.name_repair = "unique") %>%
-		select(qname, all_of(signal_indices))
-
-	## Export sequence data.
-	write.table(
-		merged_sequences, sequence_file, sep = "\t",
-		col.names = TRUE, row.names = FALSE, quote = FALSE
-	)
+	# Prepare data for export.
+	raw_df <- as.data.table(deep_obj@experiment)[,
+		.(rowid, qname, seqnames, start, end, strand, tss, score,
+		tss_group, soft_group, gene_id, transcript_id,
+		tss_distance, simple_annotations) 
+	]
 
 	# Export signal data.
 	write.table(
-		surrounding_signal, signal_file, sep = "\t",
-		col.names = TRUE, row.names = FALSE, quote = FALSE
+		raw_df, raw_report, sep = "\t", col.names = TRUE,
+		row.names = FALSE, quote = FALSE
 	)
 }
 
@@ -137,16 +106,16 @@ export_encoded <- function(deep_obj) {
 	np <- import("numpy")
 
 	## Export encoded genomic data.
-	np$save("genomic.npy", deep_obj@encoded$genomic$all)
+	np$save("genomic.npy", deep_obj@encoded$genomic)
 
 	## Export shape data.
-	np$save("shape.npy", deep_obj@encoded$shape$all)
+	np$save("shape.npy", deep_obj@encoded$shape)
 
 	## Export softclipped data.
-	np$save("softclipped.npy", deep_obj@encoded$softclipped$all)
+	np$save("softclipped.npy", deep_obj@encoded$soft)
 
 	## Export signal data.
-	np$save("signal.npy", deep_obj@encoded$signal$all)
+	np$save("signal.npy", deep_obj@encoded$signal)
 }
 
 #' Export Report
