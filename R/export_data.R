@@ -19,36 +19,37 @@ export_bedgraphs <- function(deep_obj) {
 	tss_all <- as.data.table(deep_obj@results$all)
 	tss_all[, c("start", "end") := tss]
 
-	if (deep_obj@settings$model_type == "score") {
-		tss_score <- tss_all[, .(seqnames, start, end, strand, predicted_log2_score)]
-		tss_score <- tss_score[,
-			.(score = 2^mean(predicted_log2_score)),
-			by = .(seqnames, start, end, strand)
-		]
+	## Export score.
+	tss_score <- tss_all[, .(seqnames, start, end, strand, predicted_log2_score)]
+	tss_score <- tss_score[,
+		.(score = 2^mean(predicted_log2_score)),
+		by = .(seqnames, start, end, strand)
+	]
 
-		tss_score <- makeGRangesFromDataFrame(tss_score, keep.extra.columns = TRUE)
-		
-		tss_score_pos <- tss_score[strand(tss_score) == "+"]
-		tss_score_neg <- tss_score[strand(tss_score) == "-"]
+	tss_score <- makeGRangesFromDataFrame(tss_score, keep.extra.columns = TRUE)
+	
+	tss_score_pos <- tss_score[strand(tss_score) == "+"]
+	tss_score_neg <- tss_score[strand(tss_score) == "-"]
 
-		export(tss_score_pos, "predicted_score_pos.bedgraph")
-		export(tss_score_neg, "predicted_score_neg.bedgraph")
-	} else {
-		tss_status <- tss_all[, .(seqnames, start, end, strand, status_prob)]
-		tss_status <- tss_status[,
-			.(score = mean(status_prob)),
-			by = .(seqnames, start, end, strand)
-		]
+	export(tss_score_pos, "predicted_score_pos.bedgraph")
+	export(tss_score_neg, "predicted_score_neg.bedgraph")
+	
+	## Export status.	
+	tss_status <- tss_all[, .(seqnames, start, end, strand, status_prob)]
+	tss_status <- tss_status[,
+		.(score = mean(status_prob)),
+		by = .(seqnames, start, end, strand)
+	]
 
-		tss_status <- makeGRangesFromDataFrame(tss_status, keep.extra.columns = TRUE)
+	tss_status <- makeGRangesFromDataFrame(tss_status, keep.extra.columns = TRUE)
 
-		tss_status_pos <- tss_status[strand(tss_status) == "+"]
-		tss_status_neg <- tss_status[strand(tss_status) == "-"]
+	tss_status_pos <- tss_status[strand(tss_status) == "+"]
+	tss_status_neg <- tss_status[strand(tss_status) == "-"]
 
-		export(tss_status_pos, "predicted_status_pos.bedgraph")
-		export(tss_status_neg, "predicted_status_neg.bedgraph")
-	}
+	export(tss_status_pos, "predicted_status_pos.bedgraph")
+	export(tss_status_neg, "predicted_status_neg.bedgraph")
 
+	## Export TSSs.
 	tss <- tss_all[, .(seqnames, start, end, strand, score)]
 	tss <- unique(tss)	
 	tss <- makeGRangesFromDataFrame(tss, keep.extra.columns = TRUE)
@@ -146,9 +147,10 @@ export_report <- function(deep_obj) {
 
 	## Clean up results.
 	results <- results[,
-		.(seqnames, start, end, strand, width, score, gene_id,
+		.(seqnames, start, end, strand, width, score, log2_score, gene_id,
 		transcript_id, tss_distance, annotation, simple_annotations,
-		rowid, soft_group, soft_bases, tss_group, genomic_seq, status_prob)
+		rowid, soft_group, soft_bases, tss_group, genomic_seq, status_prob,
+		predicted_log2_score)
 	]
 	results <- distinct(results, soft_group, .keep_all = TRUE)
 

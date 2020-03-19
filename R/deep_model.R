@@ -6,17 +6,13 @@
 #' @import keras
 #'
 #' @param deep_obj deep_tss object
-#' @param model_type Whether to model 'status' or 'score'
 #' @param optimizer Optimizer for compiling model
-#' @param metric Metric to optimize model.
-#' Defaults are "accuracy" for classification, and "mean_absolute_error"
-#' for score regression
 #'
 #' @rdname tss_model
 #'
 #' @export
 
-tss_model <- function(deep_obj, model_type = "status", optimizer = "adam", metric = "default") {
+tss_model <- function(deep_obj, optimizer = "adam") {
 
 	## Specify input sizes.
 
@@ -77,53 +73,45 @@ tss_model <- function(deep_obj, model_type = "status", optimizer = "adam", metri
 		shape_layer
 	))
 
-	## Answer layer.
-	if (model_type == "status") {
+	## Answer layers.
+	status_answer <- concatenated_inputs %>%
+		layer_dense(units = 512, activation = "relu") %>%
+		layer_dense(units = 512, activation = "relu") %>%
+		layer_dense(units = 256, activation = "relu") %>%
+		layer_dense(units = 256, activation = "relu") %>%
+		layer_dense(units = 1, activation = "sigmoid", name = "status_predictor")
 
-		answer <- concatenated_inputs %>%
-			layer_dense(units = 512, activation = "relu") %>%
-			layer_dense(units = 512, activation = "relu") %>%
-			layer_dense(units = 256, activation = "relu") %>%
-			layer_dense(units = 256, activation = "relu") %>%
-			layer_dense(units = 1, activation = "sigmoid")
 
-	} else if (model_type == "score") {
-
-		answer <- concatenated_inputs %>%
-			layer_dense(units = 512, activation = "relu") %>%
-			layer_dense(units = 512, activation = "relu") %>%
-			layer_dense(units = 256, activation = "relu") %>%
-			layer_dense(units = 256, activation = "relu") %>%
-			layer_dense(units = 1)
-
-	}
+	score_answer <- concatenated_inputs %>%
+		layer_dense(units = 512, activation = "relu") %>%
+		layer_dense(units = 512, activation = "relu") %>%
+		layer_dense(units = 256, activation = "relu") %>%
+		layer_dense(units = 256, activation = "relu") %>%
+		layer_dense(units = 1, activation = "linear", name = "score_predictor")
 
 	## Final model.
 	model <- keras_model(
-		list(genomic_input, soft_input, signal_input, shape_input),
-		answer
+		inputs = list(genomic_input, soft_input, signal_input, shape_input),
+		outputs = list(status_answer, score_answer)
 	)
 
 	## Compile model.
-	if (model_type == "status") {
-		if (metric == "default") metric <- "accuracy"
-
-		model %>% compile(
-			optimizer = optimizer,
-			loss = "binary_crossentropy",
-			metrics = metric
+	model %>% compile(
+		optimizer = optimizer,
+		loss = list(
+			status_predictor = "binary_crossentropy",
+			score_predictor = "mean_squared_error"
+		),
+		metrics = list(
+			status_predictor = c("accuracy", "AUC"),
+			score_predictor = "mean_absolute_error"
+		),
+		loss_weights = list(
+			status_predictor = 0.75,
+			score_predictor = 1
 		)
-	} else if (model_type == "score") {
-		if (metric == "default") metric <- "mean_absolute_error"
-
-		model %>% compile(
-			optimizer = optimizer,
-			loss = "mean_squared_error",
-			metrics = metric
-		)
-	}
-
-	deep_obj@settings$model_type <- model_type
+	)
+	
 	deep_obj@model$model <- model
 	return(deep_obj)
 }
@@ -172,21 +160,16 @@ tss_train <- function(
 	## Get original scores or status.
 	if (!is.na(subset)) {
 
-		if (deep_obj@settings$model_type == "status") {
-			original_values <- table_subset[, status]
-			original_values <- array_reshape(original_values, dim = length(original_values))
-		} else {
-			original_values <- log2(table_subset[, score])
-			original_values <- array_reshape(original_values, dim = length(original_values))
-		}
+		original_status <- table_subset[, status]
+		original_status <- array_reshape(original_values, dim = length(original_values))
+			
+		original_score <- log2(table_subset[, score])
+		original_score <- array_reshape(original_values, dim = length(original_values))
 
 	} else {
 
-		if (deep_obj@settings$model_type == "status") {
-			original_values <- deep_obj@encoded$status$train
-		} else {
-			original_values <- deep_obj@encoded$score$train
-		}
+		original_status <- deep_obj@encoded$status$train
+		original_score <- deep_obj@encoded$score$train
 	
 	}
 
@@ -201,10 +184,14 @@ tss_train <- function(
 					signalinput = signal_input,
 					shapeinput = shape_input
 				),
-				original_values,
+				list(
+					status_predictor = original_status,
+					score_predictor = original_score
+				),
 				epochs = epochs,
 				batch_size = batch_size,
-				validation_split = validation_split
+				validation_split = validation_split,
+				verbose = 2
 			)
 
 	} else {
@@ -217,7 +204,10 @@ tss_train <- function(
 					signalinput = signal_input,
 					shapeinput = shape_input
 				),
-				original_values,
+				list(
+					status_predictor = original_status,
+					score_predictor = original_score
+				),
 				epochs = epochs,
 				batch_size = batch_size,
 				validation_split = validation_split,
@@ -259,22 +249,21 @@ tss_evaluate <- function(deep_obj) {
         signal_input <- deep_obj@encoded$signal[tss_groups, , , , drop = FALSE]
         shape_input <- deep_obj@encoded$shape[tss_groups, , , , drop = FALSE]
 
-        if (deep_obj@settings$model_type == "status") {
-                original_values = deep_obj@encoded$status$test
-        } else {
-                original_values = deep_obj@encoded$score$test
-        }
-
+        original_status <- deep_obj@encoded$status$test
+        original_score <- deep_obj@encoded$score$test
 
 	accuracy_results <- deep_obj@model$trained_model %>%
 		evaluate(
-			list(
+			x = list(
 				genomicinput = sequence_input,
 				softinput = soft_input,
 				signalinput = signal_input,
 				shapeinput = shape_input
 			),
-			original_values
+			y = list(
+				status_predictor = original_status,
+				score_predictor = original_score
+			)
 		)
 
 	deep_obj@model$evaluation <- accuracy_results
@@ -314,14 +303,12 @@ tss_predict <- function(deep_obj) {
 			signalinput = signal_input,
 			shapeinput = shape_input
 		))
+	predicted <- as.data.table(predicted)
 
 	results <- as.data.table(deep_obj@experiment)
 
-	if (deep_obj@settings$model_type == "score") {
-		results[, c("log2_score", "predicted_log2_score") := list(log2(score), predicted[, 1])]
-	} else {
-		results[, status_prob := predicted[, 1]]
-	}
+	results[, c("log2_score", "predicted_log2_score") := list(log2(score), predicted[[2]])]
+	results[, status_prob := predicted[[1]]]
 
 	deep_obj@results$all <- as.data.frame(results)
 	return(deep_obj)				

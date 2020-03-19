@@ -77,8 +77,8 @@ export_encoded(tss_encoded)
 # Classifier
 
 deep_model <- tss_encoded %>%
-	tss_model(metric = c("AUC", "accuracy")) %>%
-	tss_train(epochs = 5, batch_size = 250) %>%
+	tss_model() %>%
+	tss_train(epochs = 8, batch_size = 250) %>%
 	tss_evaluate %>%
 	tss_predict
 
